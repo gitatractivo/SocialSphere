@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
     previewFeatures = ["jsonProtocol"]
 }
 
@@ -15,12 +15,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -28,12 +22,12 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String?  @db.Text
-    access_token      String?  @db.Text
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String?  @db.Text
+    id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -56,6 +50,44 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    posts         Post[]
+    likes         Like[]
+    comments      Comment[]
+
+    followers User[] @relation(name: "Followers")
+    following User[] @relation(name: "Followers")
+}
+
+model Post {
+    id        String    @id @default(cuid())
+    image     String?
+    createdAt DateTime  @default(now())
+    content   String
+    userId    String
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    likes     Like[]
+    comments  Comment[]
+
+    @@unique([createdAt,id])
+}
+
+model Like {
+    userId String
+    postId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    @@id([userId, postId])
+}
+
+model Comment {
+    userId  String
+    postId  String
+    content String
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    @@id([userId, postId])
 }
 
 model VerificationToken {
