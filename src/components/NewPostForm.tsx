@@ -46,7 +46,7 @@ function Form() {
       setInputValue("");
 
       if (session.status !== "authenticated") return;
-      trpcUtils.post.infiniteProfileFeed.setInfiniteData({}, (oldData) => {
+      trpcUtils.post.infiniteFeed.setInfiniteData({}, (oldData) => {
         if (oldData == null || oldData.pages[0] == null) return;
 
         const newCachePost = {

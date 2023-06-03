@@ -75,13 +75,13 @@ export default ProfilePage;
 
 function FollowButton({
   userId,
-  isFollowing,
-  isLoading,
+  // isFollowing,
+  // isLoading,
   onClick,
 }: {
   userId: string;
-  isFollowing: boolean;
-  isLoading: boolean;
+  // isFollowing: boolean;
+  // isLoading: boolean;
   onClick: () => void;
 }) {
   const session = useSession();
@@ -91,8 +91,8 @@ function FollowButton({
   }
 
   return (
-    <Button disabled={isLoading}  onClick={onClick} small gray={isFollowing}>
-      {isFollowing ? "Unfollow" : "Follow"}
+    <Button onClick={onClick} small gray={true}>
+      {true ? "Unfollow" : "Follow"}
     </Button>
   );
 }
