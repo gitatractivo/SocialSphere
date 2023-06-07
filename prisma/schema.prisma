@@ -30,6 +30,7 @@ model Account {
     id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    ui                String?
 
     @@unique([provider, providerAccountId])
 }
@@ -52,23 +53,42 @@ model User {
     sessions      Session[]
     posts         Post[]
     likes         Like[]
-    comments      Comment[]
 
     followers User[] @relation(name: "Followers")
     following User[] @relation(name: "Followers")
 }
 
 model Post {
-    id        String    @id @default(cuid())
-    image     String?
-    createdAt DateTime  @default(now())
-    content   String
-    userId    String
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    likes     Like[]
-    comments  Comment[]
+    id          String   @id @default(cuid())
+    createdAt   DateTime @default(now())
+    content     String
+    userId      String
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    likes       Like[]
+    commentToId String?
+    commentTO   Post?    @relation(name: "comments", fields: [commentToId], references: [id], onDelete: Cascade)
+    comments    Post[]   @relation(name: "comments")
+    repostToId  String?
+    repostTo    Post?    @relation(name: "repost", fields: [repostToId], references: [id])
+    reposts     Post[]   @relation(name: "repost")
+    file        File[]
 
-    @@unique([createdAt,id])
+    @@unique([createdAt, id])
+}
+
+model File {
+    id        String   @id @default(cuid())
+    type      String
+    url       String
+    name      String
+    extension String
+    mime      String
+    size      Int
+    height    Int?
+    width     Int?
+    createdAt DateTime @default(now())
+    postId    String
+    post      Post     @relation(fields: [postId], references: [id])
 }
 
 model Like {
@@ -76,16 +96,6 @@ model Like {
     postId String
     user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-
-    @@id([userId, postId])
-}
-
-model Comment {
-    userId  String
-    postId  String
-    content String
-    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
     @@id([userId, postId])
 }

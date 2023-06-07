@@ -63,6 +63,8 @@ export const postRouter = createTRPCRouter({
         });
       }
     ),
+
+    
   create: protectedProcedure
     .input(z.object({ content: z.string() }))
     .mutation(async ({ input: { content }, ctx }) => {
@@ -71,6 +73,8 @@ export const postRouter = createTRPCRouter({
       });
       return post;
     }),
+
+
   toggleLike: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx }) => {
