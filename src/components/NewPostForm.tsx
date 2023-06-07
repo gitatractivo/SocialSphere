@@ -146,9 +146,7 @@ function Form() {
       </div>
       {
         previewAttachments.length>0 && (
-          previewAttachments.map(attachment=>(
-            <img src={attachment.url} alt="" />
-          ))
+          null
         )
       }
       <Button className="self-end">New Post</Button>
