@@ -86,19 +86,21 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         content: z.string(),
-        files: z.object({
-          access_code: z.string(),
-          asset_id:z.string(),
-          bytes:z.number(),
-          format:z.string(),
-          url:z.string(), 
-          resource_type:z.string(),
-          width:z.number(),
-          height:z.number(),
-          version:z.number(),
-          public_id:z.string(),
-
-        }).array(),
+        files: z
+          .object({
+            access_mode: z.string().optional(),
+            asset_id: z.string(),
+            bytes: z.number(),
+            format: z.string(),
+            url: z.string(),
+            resource_type: z.string(),
+            width: z.number(),
+            height: z.number(),
+            version: z.number(),
+            public_id: z.string(),
+          })
+          .array()
+          ,
       })
     )
     .mutation(async ({ input: { content, files }, ctx }) => {
@@ -109,8 +111,29 @@ export const postRouter = createTRPCRouter({
       console.log("first");
 
       const post = await ctx.prisma.post.create({
-        data: { content, userId: ctx.session.user.id },
+        data: {
+          content,
+          userId: ctx.session.user.id,
+          file: {
+            create: files.map((file) => {
+              return {
+                url: file.url,
+                type: file.resource_type,
+                name: file.public_id,
+                extension: file.format,
+                mime: file.public_id,
+                size: file.bytes,
+                height: file.height,
+                width: file.width,
+              };
+            }),
+          },
+        },
+        include:{
+          file:true,
+        }
       });
+      console.log(post)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       return { post };
     }),
@@ -182,6 +205,9 @@ async function getInfinitePosts({
       user: {
         select: { name: true, id: true, image: true },
       },
+      file:{
+        select:{url:true,id:true,size:true,height:true,width:true,name:true}
+      },
       //update this
       likes:
         currentUserId == null
@@ -205,6 +231,7 @@ async function getInfinitePosts({
       return {
         id: post.id,
         content: post.content,
+        files: post.file,
         createdAt: post.createdAt,
         user: post.user,
         likeCount: post._count.likes,

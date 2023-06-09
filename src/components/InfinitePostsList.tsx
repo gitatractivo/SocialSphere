@@ -7,6 +7,17 @@ import { VscHeart, VscHeartFilled } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
 import { api } from "~/utils/api";
 import { LoadingSpinner } from "./LoadingSpinner";
+import Image from 'next/image';
+type File = {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  height: number | null;
+  width: number | null;
+};
+
+
 type Post = {
   id: string;
   content: string;
@@ -19,6 +30,7 @@ type Post = {
   likeCount: number;
   // commentCount: number;
   likedByMe: boolean;
+  files:File[]
 };
 
 type InfiniteTweetListProps = {
@@ -49,7 +61,7 @@ export const InfinitePostsList = ({
       <InfiniteScroll
         next={fetchNewPosts}
         hasMore={hasMore}
-        loader={<LoadingSpinner/>}
+        loader={<LoadingSpinner />}
         dataLength={posts.length}
       >
         {posts.map((post, index) => (
@@ -70,6 +82,7 @@ function PostCard({
   createdAt,
   likeCount,
   likedByMe,
+  files,
 }: Post) {
   const trpcUtils = api.useContext();
   const toggleLike = api.post.toggleLike.useMutation({
@@ -100,9 +113,9 @@ function PostCard({
       };
 
       trpcUtils.post.infiniteFeed.setInfiniteData({}, updateData);
-      trpcUtils.post.infiniteFeed.setInfiniteData({onlyFollowing:true}, updateData);
+      trpcUtils.post.infiniteFeed.setInfiniteData({ onlyFollowing: true }, updateData);
       trpcUtils.post.infiniteProfileFeed.setInfiniteData(
-        { userId: user.id},
+        { userId: user.id },
         updateData
       );
 
@@ -132,6 +145,14 @@ function PostCard({
           </span>
         </div>
         <p className="whitespace-pre-wrap">{content}</p>
+        <p className="flex gap-4">
+
+        {files?.length>0 && files?.map(file=>{
+            return (
+              <Image src={file.url} alt={file.name} width={500} height={500} key={file.id} className="rounded-lg"/>
+            );
+        })}
+        </p>
         <HeartButton
           onClick={handleToggleLike}
           isLoading={toggleLike.isLoading}
@@ -171,19 +192,17 @@ function HeartButton({
     <button
       disabled={isLoading}
       onClick={onClick}
-      className={`group ml-2  flex items-center gap-1 self-start transition-colors duration-200 ${
-        likedByMe
+      className={`group ml-2  flex items-center gap-1 self-start transition-colors duration-200 ${likedByMe
           ? "text-red-500"
           : "text-gray-500 hover:text-red-500 focus-visible:text-red-500"
-      }`}
+        }`}
     >
       <IconHoverEffect red>
         <HeartIcon
-          className={`transition-colors duration-200 ${
-            likedByMe
+          className={`transition-colors duration-200 ${likedByMe
               ? "fill-red-500"
               : "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
-          }`}
+            }`}
         />
       </IconHoverEffect>
       <span>{likeCount}</span>

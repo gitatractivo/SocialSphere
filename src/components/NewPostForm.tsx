@@ -16,6 +16,8 @@ import { UploadApiResponse } from "cloudinary";
 import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import imageCompression from "browser-image-compression";
+import { VscDeviceCamera } from "react-icons/vsc";
+import { IconHoverEffect } from './IconHoverEffect';
 
 function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
   if (textArea == null) return;
@@ -72,7 +74,7 @@ function Form() {
 
   const createPost = api.post.create.useMutation({
     onSuccess: ({ post: newPost }) => {
-      console.log("fileResp");
+      console.log("fileResp", newPost);
       setInputValue("");
       setPreviewAttachments([]);
 
@@ -90,6 +92,8 @@ function Form() {
             name: session.data.user.name || null,
             image: session.data.user.image || null,
           },
+          files: newPost.file,
+          // fil
         };
         return {
           ...oldData,
@@ -107,34 +111,33 @@ function Form() {
 
   const getDetails = api.post.getDetails.useQuery();
 
-  async function compress(imageFile:File) {
-    
-
+  async function compress(imageFile: File) {
     const options = {
-      maxSizeMB: 0.6,
+      maxSizeMB: 0.5,
       maxWidthOrHeight: 1920,
       useWebWorker: true,
     };
     try {
       const compressedFile = await imageCompression(imageFile, options);
-      
 
-        return compressedFile // write your own logic
+      return compressedFile; // write your own logic
     } catch (error) {
       console.log(error);
-      return imageFile
+      return imageFile;
     }
   }
- 
-  const url = `https://api.cloudinary.com/v1_1/${getDetails?.data?.cloudName as string}/image/upload`;
 
-  const upload =async(attachment:FileAndAttachment)=>{
+  const url = `https://api.cloudinary.com/v1_1/${
+    getDetails?.data?.cloudName as string
+  }/image/upload`;
+
+  const upload = async (attachment: FileAndAttachment) => {
     const formData = new FormData();
     const timestamp = Math.round(new Date().getTime() / 1000).toString();
     const publicId = uuid() + attachment.file.name;
     // const signature = generateSignature(timestamp,publicId,apiSecret,apiKey);
-    const file =await compress(attachment.file) 
-    
+    const file = await compress(attachment.file);
+
     formData.append("folder", "SocialSphere/Post");
     formData.append("upload_preset", "srmau0vz");
     formData.append("api_key", getDetails?.data?.apiKey as string);
@@ -147,17 +150,19 @@ function Form() {
       method: "POST",
       body: formData,
     });
-    
-    return resp.json()
-  }
 
-  const handleSubmit = async(e: FormEvent) => {
+    return resp.json();
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    const files = await Promise.all(previewAttachments.map(attachment=>upload(attachment)))
-  
 
-    createPost.mutate({ content: inputValue ,files});
+    const files = await Promise.all(
+      previewAttachments.map((attachment) => upload(attachment))
+    );
+    console.log(files);
+
+    createPost.mutate({ content: inputValue, files });
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,22 +198,19 @@ function Form() {
         <textarea
           ref={inputRef}
           style={{ height: "0px" }}
-          className="p--4 flex-grow resize-none overflow-hidden text-lg outline-none"
+          className="flex-grow resize-none overflow-hidden  p-4 text-lg outline-none"
           placeholder="What's Happening?"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
         />
         <input
           type="file"
-          className="invisible"
+          className="hidden"
           multiple
           ref={imgInputRef}
           id=""
           onChange={onFileChange}
         />
-        <Button type="button" onClick={() => imgInputRef.current?.click()}>
-          Images
-        </Button>
       </div>
       {previewAttachments.length > 0 && (
         <Attachments
@@ -216,9 +218,19 @@ function Form() {
           attachments={previewAttachments}
         />
       )}
-      <Button type="submit" className="self-end">
-        New Post
-      </Button>
+      <div className="flex justify-between">
+        <div className="flex w-[70%] justify-stretch">
+          <button type="button" onClick={() => imgInputRef.current?.click()}>
+            <IconHoverEffect>
+              <VscDeviceCamera />
+            </IconHoverEffect>
+          </button>
+        </div>
+
+        <Button type="submit" className="self-end">
+          New Post
+        </Button>
+      </div>
     </form>
   );
 }
