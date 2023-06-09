@@ -10,7 +10,12 @@ import {
   useState,
 } from "react";
 import { api } from "~/utils/api";
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
+import Attachments from "./Attachments";
+import { UploadApiResponse } from "cloudinary";
+import { v4 as uuid } from "uuid";
+import crypto from "crypto";
+import imageCompression from "browser-image-compression";
 
 function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
   if (textArea == null) return;
@@ -35,9 +40,7 @@ function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
 //             createdAt: Date,
 // }}
 
-type FileAndAttachment = { file: File;url: string  };
-
-
+export type FileAndAttachment = { file: File; url: string };
 
 export const NewPostForm = () => {
   const session = useSession();
@@ -57,7 +60,7 @@ function Form() {
     updateTextAreaSize(textArea);
     textAreaRef.current = textArea;
   }, []);
-  const imgInputRef = useRef<HTMLInputElement>(null)
+  const imgInputRef = useRef<HTMLInputElement>(null);
 
   useLayoutEffect(() => {
     updateTextAreaSize(textAreaRef.current);
@@ -68,8 +71,10 @@ function Form() {
   const trpcUtils = api.useContext();
 
   const createPost = api.post.create.useMutation({
-    onSuccess: (newPost) => {
+    onSuccess: ({ post: newPost }) => {
+      console.log("fileResp");
       setInputValue("");
+      setPreviewAttachments([]);
 
       if (session.status !== "authenticated") return;
       trpcUtils.post.infiniteFeed.setInfiniteData({}, (oldData) => {
@@ -78,7 +83,7 @@ function Form() {
         const newCachePost = {
           ...newPost,
           likeCount: 0,
-          commentCount:0,
+          // commentCount:0,
           likedByMe: false,
           user: {
             id: session.data.user.id,
@@ -100,19 +105,67 @@ function Form() {
     },
   });
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    createPost.mutate({ content: inputValue });
+  const getDetails = api.post.getDetails.useQuery();
+
+  async function compress(imageFile:File) {
+    
+
+    const options = {
+      maxSizeMB: 0.6,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+    try {
+      const compressedFile = await imageCompression(imageFile, options);
+      
+
+        return compressedFile // write your own logic
+    } catch (error) {
+      console.log(error);
+      return imageFile
+    }
+  }
+ 
+  const url = `https://api.cloudinary.com/v1_1/${getDetails?.data?.cloudName as string}/image/upload`;
+
+  const upload =async(attachment:FileAndAttachment)=>{
+    const formData = new FormData();
+    const timestamp = Math.round(new Date().getTime() / 1000).toString();
+    const publicId = uuid() + attachment.file.name;
+    // const signature = generateSignature(timestamp,publicId,apiSecret,apiKey);
+    const file =await compress(attachment.file) 
+    
+    formData.append("folder", "SocialSphere/Post");
+    formData.append("upload_preset", "srmau0vz");
+    formData.append("api_key", getDetails?.data?.apiKey as string);
+    formData.append(`file`, file);
+    formData.append(`public_id`, publicId);
+    // formData.append(`signature`, signature);
+    // formData.append(`timestamp`, timestamp);
+
+    const resp = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+    
+    return resp.json()
   }
 
+  const handleSubmit = async(e: FormEvent) => {
+    e.preventDefault();
+    
+    const files = await Promise.all(previewAttachments.map(attachment=>upload(attachment)))
+  
+
+    createPost.mutate({ content: inputValue ,files});
+  };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newPreviewAttachments = [];
 
       for (const file of e.target.files) {
-        
-        const url= URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
         newPreviewAttachments.push({
           file,
           url,
@@ -122,12 +175,17 @@ function Form() {
       setPreviewAttachments([...previewAttachments, ...newPreviewAttachments]);
     }
   };
-  console.log(previewAttachments,"attachments array")
 
+  const onRemoveFile = (attachment: FileAndAttachment) => {
+    const newPreviewAttachments = previewAttachments.filter(
+      (a) => a.url !== attachment.url
+    );
+    setPreviewAttachments(newPreviewAttachments);
+  };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={(e) => void handleSubmit(e)}
       className="flex flex-col gap-2 border-b px-4 py-2"
     >
       <div className="flex gap-4">
@@ -139,17 +197,30 @@ function Form() {
           placeholder="What's Happening?"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          
         />
-        <input type="file" className="invisible" multiple ref={imgInputRef} id=""  onChange={onFileChange}/>
-          <Button onClick={()=>imgInputRef.current?.click()}>Images</Button>
+        <input
+          type="file"
+          className="invisible"
+          multiple
+          ref={imgInputRef}
+          id=""
+          onChange={onFileChange}
+        />
+        <Button type="button" onClick={() => imgInputRef.current?.click()}>
+          Images
+        </Button>
       </div>
-      {
-        previewAttachments.length>0 && (
-          null
-        )
-      }
-      <Button className="self-end">New Post</Button>
+      {previewAttachments.length > 0 && (
+        <Attachments
+          onRemoveAttachment={onRemoveFile}
+          attachments={previewAttachments}
+        />
+      )}
+      <Button type="submit" className="self-end">
+        New Post
+      </Button>
     </form>
   );
 }
+
+export type RemoveAttachmentType = (attachment: FileAndAttachment) => void;

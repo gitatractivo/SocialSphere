@@ -7,6 +7,29 @@ import {
   protectedProcedure,
   createTRPCContext,
 } from "~/server/api/trpc";
+import cloudinary from "~/server/cloudinary";
+import formidable, { IncomingForm } from "formidable";
+import { type UploadApiResponse } from "cloudinary";
+// import IncomingForm from "formidable/Formidable";
+// import tIncomingForm from 'formidable/Formidable';
+// import IncomingForm from "formidable/Formidable";
+
+interface CloudinaryImageResponse {
+  public_id: string;
+  version: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;
+  tags: string[];
+  bytes: number;
+  type: string;
+  url: string;
+  secure_url: string;
+  original_filename: string;
+}
 
 export const postRouter = createTRPCRouter({
   infiniteProfileFeed: publicProcedure
@@ -17,21 +40,16 @@ export const postRouter = createTRPCRouter({
         cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
       })
     )
-    .query(
-      async ({ input: { limit = 10, userId, cursor }, ctx }) => {
-        const currentUserId = ctx.session?.user.id;
+    .query(async ({ input: { limit = 10, userId, cursor }, ctx }) => {
+      const currentUserId = ctx.session?.user.id;
 
-        return await getInfinitePosts({
-          limit,
-          ctx,
-          cursor,
-          whereClause: {userId}
-            
-
-
-        });
-      }
-    ),
+      return await getInfinitePosts({
+        limit,
+        ctx,
+        cursor,
+        whereClause: { userId },
+      });
+    }),
   infiniteFeed: publicProcedure
     .input(
       z.object({
@@ -64,16 +82,38 @@ export const postRouter = createTRPCRouter({
       }
     ),
 
-    
   create: protectedProcedure
-    .input(z.object({ content: z.string() }))
-    .mutation(async ({ input: { content }, ctx }) => {
+    .input(
+      z.object({
+        content: z.string(),
+        files: z.object({
+          access_code: z.string(),
+          asset_id:z.string(),
+          bytes:z.number(),
+          format:z.string(),
+          url:z.string(), 
+          resource_type:z.string(),
+          width:z.number(),
+          height:z.number(),
+          version:z.number(),
+          public_id:z.string(),
+
+        }).array(),
+      })
+    )
+    .mutation(async ({ input: { content, files }, ctx }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      // const filesjson:string[] = JSON.parse(files as string)
+      //cloudinary
+      console.log(files, "files");
+      console.log("first");
+
       const post = await ctx.prisma.post.create({
         data: { content, userId: ctx.session.user.id },
       });
-      return post;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      return { post };
     }),
-
 
   toggleLike: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -94,6 +134,26 @@ export const postRouter = createTRPCRouter({
         return { addedLike: false };
       }
     }),
+  getDetails: protectedProcedure.query(() => {
+    console.log("first");
+
+    const apiSecret = cloudinary.config().api_secret as string;
+    const apiKey = cloudinary.config().api_key as string;
+    const cloudName = cloudinary.config().cloud_name as string;
+
+    const timestamp = Math.round(new Date().getTime() / 1000);
+
+    const signature = cloudinary.utils.api_sign_request(
+      {
+        timestamp: timestamp,
+        source: "uw",
+        folder: "signed_upload_demo_uw",
+      },
+      apiSecret
+    );
+
+    return { apiSecret, apiKey, cloudName, signature };
+  }),
 });
 
 async function getInfinitePosts({
@@ -118,7 +178,7 @@ async function getInfinitePosts({
       id: true,
       content: true,
       createdAt: true,
-      _count: { select: { likes: true, comments: true } },
+      _count: { select: { likes: true } },
       user: {
         select: { name: true, id: true, image: true },
       },
@@ -148,7 +208,7 @@ async function getInfinitePosts({
         createdAt: post.createdAt,
         user: post.user,
         likeCount: post._count.likes,
-        commentCount: post._count.comments,
+        // commentCount: post._count.comments,
         likedByMe: post.likes?.length > 0,
       };
     }),

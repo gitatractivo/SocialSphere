@@ -17,7 +17,7 @@ type Post = {
     name: string | null;
   };
   likeCount: number;
-  commentCount: number;
+  // commentCount: number;
   likedByMe: boolean;
 };
 
