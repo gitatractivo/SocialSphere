@@ -85,7 +85,7 @@ export const postRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        content: z.string(),
+        content: z.string().optional(),
         files: z
           .object({
             access_mode: z.string().optional(),
@@ -105,12 +105,46 @@ export const postRouter = createTRPCRouter({
         OriginalPostId:z.string().optional(),
       })
     )
-    .mutation(async ({ input: { content, files }, ctx }) => {
+    .mutation(async ({ input: { content="", files,isComment,isRepost,OriginalPostId }, ctx }) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       // const filesjson:string[] = JSON.parse(files as string)
       //cloudinary
       console.log(files, "files");
       console.log("first");
+
+      
+      if(isComment){
+
+        const post = await ctx.prisma.post.create({
+          data: {
+            content,
+            userId: ctx.session.user.id,
+            commentToId:OriginalPostId,          
+            file: {
+              create: files.map((file) => {
+                return {
+                  url: file.url,
+                  type: file.resource_type,
+                  name: file.public_id,
+                  extension: file.format,
+                  mime: file.public_id,
+                  size: file.bytes,
+                  height: file.height,
+                  width: file.width,
+                };
+              }),
+            },
+          },
+          include: {
+            file: true,
+          },
+        });
+        console.log(post);
+        return {post}
+      }
+
+
+
 
       const post = await ctx.prisma.post.create({
         data: {

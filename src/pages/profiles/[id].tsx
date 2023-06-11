@@ -22,6 +22,21 @@ const ProfilePage: NextPage<
   const profileQuery = api.profile.getById.useQuery({ id });
   const { data: profile } = profileQuery;
 
+  const trpcUtils = api.useContext()
+  const toggleFollow = api.profile.toggleFollow.useMutation({
+    onSuccess: ({addedFollow}) => {
+      trpcUtils.profile.getById.setData({id},(oldData)=>{
+        if(oldData==null) return;
+        const countModifier = addedFollow?1:-1;
+        return{
+          ...oldData,
+          isFollowing:addedFollow,
+          followersCount:oldData.followersCount+countModifier,
+        }
+      })
+    }
+  })
+
   const posts = api.post.infiniteProfileFeed.useInfiniteQuery({userId:id},{getNextPageParam: (lastPage)=>lastPage.nextCursor})
 
   if (profileQuery.isLoading) return <LoadingSpinner />;
@@ -51,10 +66,10 @@ const ProfilePage: NextPage<
           </div>
         </div>
         <FollowButton
-          // isFollowing={profile.isFollowing}
-          // isLoading={toggleFollow.isLoading}
+          isFollowing={profile.isFollowing}
+          isLoading={toggleFollow.isLoading}
           userId={id}
-          onClick={() => null}
+          onClick={() => toggleFollow.mutate({userId:id})}
         />
       </header>
 
@@ -75,13 +90,13 @@ export default ProfilePage;
 
 function FollowButton({
   userId,
-  // isFollowing,
-  // isLoading,
+  isFollowing,
+  isLoading,
   onClick,
 }: {
   userId: string;
-  // isFollowing: boolean;
-  // isLoading: boolean;
+  isFollowing: boolean;
+  isLoading: boolean;
   onClick: () => void;
 }) {
   const session = useSession();
@@ -91,8 +106,8 @@ function FollowButton({
   }
 
   return (
-    <Button onClick={onClick} small gray={true}>
-      {true ? "Unfollow" : "Follow"}
+    <Button disabled={isLoading} onClick={onClick} small gray={isFollowing}>
+      {isFollowing ? "Unfollow" : "Follow"}
     </Button>
   );
 }
