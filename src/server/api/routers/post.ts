@@ -99,8 +99,10 @@ export const postRouter = createTRPCRouter({
             version: z.number(),
             public_id: z.string(),
           })
-          .array()
-          ,
+          .array(),
+        isRepost:z.boolean().default(false),
+        isComment: z.boolean().default(false),
+        OriginalPostId:z.string().optional(),
       })
     )
     .mutation(async ({ input: { content, files }, ctx }) => {
