@@ -3,12 +3,12 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import Link from "next/link";
 import { ProfileImage } from "./ProfileImage";
 import { useSession } from "next-auth/react";
-import { VscHeart, VscHeartFilled } from "react-icons/vsc";
+import { VscComment, VscHeart, VscHeartFilled } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
 import { api } from "~/utils/api";
 import { LoadingSpinner } from "./LoadingSpinner";
 import Image from 'next/image';
-type File = {
+export type File = {
   id: string;
   name: string;
   url: string;
@@ -18,7 +18,7 @@ type File = {
 };
 
 
-type Post = {
+export type Post = {
   id: string;
   content: string;
   createdAt: Date;
@@ -131,6 +131,7 @@ function PostCard({
       <Link href={`/profiles/${user.id}`}>
         <ProfileImage src={user.image} />
       </Link>
+
       <div className="ml-2 flex flex-grow flex-col">
         <div className="flex gap-1">
           <Link
@@ -144,15 +145,25 @@ function PostCard({
             {dateTimeFormatter.format(createdAt)}
           </span>
         </div>
+        <Link href={`/post/${id}`}>
+
         <p className="whitespace-pre-wrap">{content}</p>
         <p className="flex gap-4">
-
-        {files?.length>0 && files?.map(file=>{
-            return (
-              <Image src={file.url} alt={file.name} width={500} height={500} key={file.id} className="rounded-lg"/>
-            );
-        })}
+          {files?.length > 0 &&
+            files?.map((file) => {
+              return (
+                <Image
+                  src={file.url}
+                  alt={file.name}
+                  width={500}
+                  height={500}
+                  key={file.id}
+                  className="rounded-lg"
+                />
+              );
+            })}
         </p>
+        </Link>
         <HeartButton
           onClick={handleToggleLike}
           isLoading={toggleLike.isLoading}
@@ -163,19 +174,19 @@ function PostCard({
     </li>
   );
 }
-type HeartButtonProps = {
+export type HeartButtonProps = {
   onClick: () => void;
   isLoading: boolean;
   likedByMe: boolean;
   likeCount: number;
 };
 
-function HeartButton({
+export const HeartButton=({
   isLoading,
   onClick,
   likedByMe,
   likeCount,
-}: HeartButtonProps) {
+}: HeartButtonProps)=> {
   const session = useSession();
   const HeartIcon = likedByMe ? VscHeartFilled : VscHeart;
 
@@ -206,6 +217,55 @@ function HeartButton({
         />
       </IconHoverEffect>
       <span>{likeCount}</span>
+    </button>
+  );
+}
+
+type CommentButtonProps = {
+  onClick: () => void;
+  isLoading: boolean;
+  commentByMe: boolean;
+  commentCount: number;
+};
+
+export const CommentButton=({
+  isLoading,
+  onClick,
+  commentByMe,
+  commentCount,
+}: CommentButtonProps)=> {
+  const session = useSession();
+  // const HeartIcon = commentdByMe ? VscHeartFilled : VscHeart;
+
+  if (session.status !== "authenticated") {
+    return (
+      <div className="mb-1 mt-1 flex items-center gap-3 self-start text-gray-500">
+        <VscComment />
+        <span>{commentCount}</span>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      disabled={isLoading}
+      onClick={onClick}
+      className={`group ml-2  flex items-center gap-1 self-start transition-colors duration-200 ${
+        commentByMe
+          ? "text-red-500"
+          : "text-gray-500 hover:text-red-500 focus-visible:text-red-500"
+      }`}
+    >
+      <IconHoverEffect red>
+        <VscComment
+          className={`transition-colors duration-200 ${
+            commentByMe
+              ? "fill-red-500"
+              : "fill-gray-500 group-hover:fill-red-500 group-focus-visible:fill-red-500"
+          }`}
+        />
+      </IconHoverEffect>
+      <span>{commentCount}</span>
     </button>
   );
 }

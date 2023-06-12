@@ -81,6 +81,21 @@ export const postRouter = createTRPCRouter({
         });
       }
     ),
+    infiniteComments:publicProcedure
+      .input(
+        z.object({
+          id:z.string(),
+          limit: z.number().optional(),
+        cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
+        })
+      ).query(async ({input:{id,limit=10,cursor},ctx})=>{
+        return await getInfinitePosts({
+          limit,
+          ctx,
+          cursor,
+          whereClause: {commentToId:id},
+        });
+      }),
 
   create: protectedProcedure
     .input(
@@ -100,26 +115,56 @@ export const postRouter = createTRPCRouter({
             public_id: z.string(),
           })
           .array(),
-        isRepost:z.boolean().default(false),
+        isRepost: z.boolean().default(false),
         isComment: z.boolean().default(false),
-        OriginalPostId:z.string().optional(),
+        OriginalPostId: z.string().optional(),
       })
     )
-    .mutation(async ({ input: { content="", files,isComment,isRepost,OriginalPostId }, ctx }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      // const filesjson:string[] = JSON.parse(files as string)
-      //cloudinary
-      console.log(files, "files");
-      console.log("first");
+    .mutation(
+      async ({
+        input: { content = "", files, isComment, isRepost, OriginalPostId },
+        ctx,
+      }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // const filesjson:string[] = JSON.parse(files as string)
+        //cloudinary
+        console.log(files, "files");
+        console.log("first");
 
-      
-      if(isComment){
+        if (isComment) {
+          const post = await ctx.prisma.post.create({
+            data: {
+              content,
+              userId: ctx.session.user.id,
+              // commentoId:
+              commentToId: OriginalPostId,
+              file: {
+                create: files.map((file) => {
+                  return {
+                    url: file.url,
+                    type: file.resource_type,
+                    name: file.public_id,
+                    extension: file.format,
+                    mime: file.public_id,
+                    size: file.bytes,
+                    height: file.height,
+                    width: file.width,
+                  };
+                }),
+              },
+            },
+            include: {
+              file: true,
+            },
+          });
+          console.log(post);
+          return { post };
+        }
 
         const post = await ctx.prisma.post.create({
           data: {
             content,
             userId: ctx.session.user.id,
-            commentToId:OriginalPostId,          
             file: {
               create: files.map((file) => {
                 return {
@@ -140,39 +185,10 @@ export const postRouter = createTRPCRouter({
           },
         });
         console.log(post);
-        return {post}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        return { post };
       }
-
-
-
-
-      const post = await ctx.prisma.post.create({
-        data: {
-          content,
-          userId: ctx.session.user.id,
-          file: {
-            create: files.map((file) => {
-              return {
-                url: file.url,
-                type: file.resource_type,
-                name: file.public_id,
-                extension: file.format,
-                mime: file.public_id,
-                size: file.bytes,
-                height: file.height,
-                width: file.width,
-              };
-            }),
-          },
-        },
-        include:{
-          file:true,
-        }
-      });
-      console.log(post)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      return { post };
-    }),
+    ),
 
   toggleLike: protectedProcedure
     .input(z.object({ id: z.string() }))
@@ -192,6 +208,42 @@ export const postRouter = createTRPCRouter({
         });
         return { addedLike: false };
       }
+    }),
+  getById: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ input: { id }, ctx }) => {
+      const currentUserId = ctx.session?.user.id;
+
+      const post = await ctx.prisma.post.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          _count: { select: { likes: true, comments: true, reposts: true } },
+          user: {
+            select: { name: true, id: true, image: true },
+          },
+          file: true,
+          commentToId: true,
+          repostToId: true,
+          likes:
+            currentUserId == null
+              ? false
+              : {
+                  where: {
+                    userId: currentUserId,
+                  },
+                },
+          
+        },
+      });
+      if(post==null)  return;
+      return {...post,isLiked:post.likes.length>0};
     }),
   getDetails: protectedProcedure.query(() => {
     console.log("first");
@@ -241,8 +293,15 @@ async function getInfinitePosts({
       user: {
         select: { name: true, id: true, image: true },
       },
-      file:{
-        select:{url:true,id:true,size:true,height:true,width:true,name:true}
+      file: {
+        select: {
+          url: true,
+          id: true,
+          size: true,
+          height: true,
+          width: true,
+          name: true,
+        },
       },
       //update this
       likes:
