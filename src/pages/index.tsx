@@ -1,7 +1,7 @@
-import { type NextPage } from "next";
-import { InfinitePostsList } from "~/components/InfinitePostsList";
+import { NextPageContext, type NextPage } from "next";
+import { InfinitePostsList, Post } from "~/components/InfinitePostsList";
 import { NewPostForm } from "~/components/NewPostForm";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useState } from "react";
 
@@ -11,12 +11,15 @@ const Home: NextPage = () => {
   const [selectedTab, setSelectedTab] =
     useState<(typeof TABS)[number]>("Recent");
   const session = useSession();
+  console.log(session,"session")
+  console.log(session?.data?.user?.username, "session");
+  
   return (
     <>
       <header className="sticky top-0 z-10 bg-white pt-2">
         {/* <h1 className="mb-2 px-4 text-lg font-bold">Home</h1> */}
       </header>
-      {session.status === "authenticated" && (
+      {session.status === "authenticated" && !!session.data.user.username && (
         <div className="flex">
           {TABS.map((tab) => {
             return (
@@ -50,7 +53,7 @@ function RecentPosts() {
 
   return (
     <InfinitePostsList
-      posts={posts.data?.pages.flatMap((page) => page.posts)}
+      posts={posts.data?.pages.flatMap((page) => page.posts as Post[])}
       isError={posts.isError}
       isLoading={posts.isLoading}
       hasMore={posts.hasNextPage || false}
@@ -67,7 +70,9 @@ function FollowingPosts() {
 
   return (
     <InfinitePostsList
-      posts={posts.data?.pages.flatMap((page) => page.posts)}
+      posts={posts.data?.pages.flatMap(
+        (page) => page.posts as Post[]
+      )}
       isError={posts.isError}
       isLoading={posts.isLoading}
       hasMore={posts.hasNextPage || false}
@@ -77,3 +82,12 @@ function FollowingPosts() {
 }
 
 export default Home;
+
+export async function getServerSideProps(context: NextPageContext) {
+  const session = await getSession(context);
+  return {
+    props: {
+      session,
+    },
+  };
+}

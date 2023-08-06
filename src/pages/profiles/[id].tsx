@@ -14,7 +14,7 @@ import { VscArrowLeft } from "react-icons/vsc";
 import { ProfileImage } from "~/components/ProfileImage";
 import { useSession } from "next-auth/react";
 import { Button } from "~/components/Button";
-import { InfinitePostsList } from "~/components/InfinitePostsList";
+import { InfinitePostsList, Post } from "~/components/InfinitePostsList";
 
 const ProfilePage: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
@@ -69,20 +69,19 @@ const ProfilePage: NextPage<
           isFollowing={profile.isFollowing}
           isLoading={toggleFollow.isLoading}
           userId={id}
-          onClick={() => toggleFollow.mutate({userId:id})}
+          onClick={() => toggleFollow.mutate({ userId: id })}
         />
       </header>
 
       <main>
         <InfinitePostsList
-          posts={posts.data?.pages.flatMap((page) => page.posts)}
+          posts={posts.data?.pages.flatMap((page) => page.posts as Post[])}
           isError={posts.isError}
           isLoading={posts.isLoading}
           hasMore={posts.hasNextPage || false}
           fetchNewPosts={posts.fetchNextPage}
         />
       </main>
-
     </>
   );
 };

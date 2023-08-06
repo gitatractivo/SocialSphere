@@ -10,6 +10,7 @@ import {
 import cloudinary from "~/server/cloudinary";
 import formidable, { IncomingForm } from "formidable";
 import { type UploadApiResponse } from "cloudinary";
+import { FileInput } from "~/utils/types";
 // import IncomingForm from "formidable/Formidable";
 // import tIncomingForm from 'formidable/Formidable';
 // import IncomingForm from "formidable/Formidable";
@@ -81,92 +82,69 @@ export const postRouter = createTRPCRouter({
         });
       }
     ),
-    infiniteComments:publicProcedure
-      .input(
-        z.object({
-          id:z.string(),
-          limit: z.number().optional(),
+  infiniteComments: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        limit: z.number().optional(),
         cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
-        })
-      ).query(async ({input:{id,limit=10,cursor},ctx})=>{
-        return await getInfinitePosts({
-          limit,
-          ctx,
-          cursor,
-          whereClause: {commentToId:id},
-        });
-      }),
+      })
+    )
+    .query(async ({ input: { id, limit = 10, cursor }, ctx }) => {
+      return await getInfinitePosts({
+        limit,
+        ctx,
+        cursor,
+        whereClause: { commentToId: id },
+      });
+    }),
 
   create: protectedProcedure
     .input(
-      z.object({
-        content: z.string().optional(),
-        files: z
-          .object({
-            access_mode: z.string().optional(),
-            asset_id: z.string(),
-            bytes: z.number(),
-            format: z.string(),
-            url: z.string(),
-            resource_type: z.string(),
-            width: z.number(),
-            height: z.number(),
-            version: z.number(),
-            public_id: z.string(),
-          })
-          .array(),
-        isRepost: z.boolean().default(false),
-        isComment: z.boolean().default(false),
-        OriginalPostId: z.string().optional(),
-      })
+      z
+        .object({
+          content: z.string(),
+          files: FileInput.array(),
+          isRepost: z.boolean().default(false),
+          isComment: z.boolean().default(false),
+          OriginalPostId: z.string(),
+        })
+        .partial({
+          content: true,
+          files: true,
+          OriginalPostId: true,
+        })
+        .refine(
+          ({ OriginalPostId, content, files }) =>
+            OriginalPostId || content || (files && files.length > 0),
+          { message: "Content, Original Post Id, or files are required" }
+        )
     )
     .mutation(
       async ({
-        input: { content = "", files, isComment, isRepost, OriginalPostId },
+        input: { content, files, isComment, isRepost, OriginalPostId },
         ctx,
       }) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         // const filesjson:string[] = JSON.parse(files as string)
         //cloudinary
-        console.log(files, "files");
-        console.log("first");
-
-        if (isComment) {
-          const post = await ctx.prisma.post.create({
-            data: {
-              content,
-              userId: ctx.session.user.id,
-              // commentoId:
-              commentToId: OriginalPostId,
-              file: {
-                create: files.map((file) => {
-                  return {
-                    url: file.url,
-                    type: file.resource_type,
-                    name: file.public_id,
-                    extension: file.format,
-                    mime: file.public_id,
-                    size: file.bytes,
-                    height: file.height,
-                    width: file.width,
-                  };
-                }),
-              },
-            },
-            include: {
-              file: true,
-            },
-          });
-          console.log(post);
-          return { post };
-        }
 
         const post = await ctx.prisma.post.create({
           data: {
-            content,
+            ...(content ? { content } : {}),
             userId: ctx.session.user.id,
-            file: {
-              create: files.map((file) => {
+            ...(isComment
+              ? {
+                  commentToId: OriginalPostId,
+                }
+              : {}),
+            ...(isRepost
+              ? {
+                  repostToId: OriginalPostId,
+                }
+              : {}),
+            files: {
+              create: files?.map((file) => {
                 return {
                   url: file.url,
                   type: file.resource_type,
@@ -181,7 +159,7 @@ export const postRouter = createTRPCRouter({
             },
           },
           include: {
-            file: true,
+            files: true,
           },
         });
         console.log(post);
@@ -228,7 +206,7 @@ export const postRouter = createTRPCRouter({
           user: {
             select: { name: true, id: true, image: true },
           },
-          file: true,
+          files: true,
           commentToId: true,
           repostToId: true,
           likes:
@@ -239,11 +217,10 @@ export const postRouter = createTRPCRouter({
                     userId: currentUserId,
                   },
                 },
-          
         },
       });
-      if(post==null)  return;
-      return {...post,isLiked:post.likes.length>0};
+      if (post == null) return;
+      return { ...post, isLiked: post.likes.length > 0 };
     }),
   getDetails: protectedProcedure.query(() => {
     console.log("first");
@@ -289,11 +266,11 @@ async function getInfinitePosts({
       id: true,
       content: true,
       createdAt: true,
-      _count: { select: { likes: true } },
+      _count: { select: { likes: true ,comments: true,reposts: true} },
       user: {
         select: { name: true, id: true, image: true },
       },
-      file: {
+      files: {
         select: {
           url: true,
           id: true,
@@ -326,11 +303,12 @@ async function getInfinitePosts({
       return {
         id: post.id,
         content: post.content,
-        files: post.file,
+        files: post.files,
         createdAt: post.createdAt,
         user: post.user,
         likeCount: post._count.likes,
-        // commentCount: post._count.comments,
+        commentCount: post._count.comments,
+        repostCount: post._count.reposts,
         likedByMe: post.likes?.length > 0,
       };
     }),

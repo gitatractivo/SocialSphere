@@ -5,11 +5,15 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import Head from "next/head";
 import SideNav from "~/components/SideNav";
+import { useRouter } from "next/router";
+
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const router = useRouter();
+  const isEnterRoute = router.pathname === "/enter";
   return (
     <SessionProvider session={session}>
       <Head>
@@ -21,8 +25,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="container mx-auto flex items-start sm:pr-4">
-        <SideNav />
-        <div className="min-h-screen max-w-3xl mx-auto flex-grow border-x">
+        {isEnterRoute ? null : <SideNav />}
+        <div className="mx-auto min-h-screen max-w-3xl flex-grow border-x">
           <Component {...pageProps} />
         </div>
       </div>

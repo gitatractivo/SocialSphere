@@ -20,7 +20,7 @@ export type File = {
 
 export type Post = {
   id: string;
-  content: string;
+  content?: string;
   createdAt: Date;
   user: {
     image: string | null;
@@ -28,9 +28,10 @@ export type Post = {
     name: string | null;
   };
   likeCount: number;
-  // commentCount: number;
+  commentCount: number;
+  repostCount: number;
   likedByMe: boolean;
-  files:File[]
+  files: File[];
 };
 
 type InfiniteTweetListProps = {

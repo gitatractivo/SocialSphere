@@ -85,14 +85,15 @@ function Form() {
         const newCachePost = {
           ...newPost,
           likeCount: 0,
-          // commentCount:0,
+          commentCount:0,
+          repostCount:0,
           likedByMe: false,
           user: {
             id: session.data.user.id,
             name: session.data.user.name || null,
             image: session.data.user.image || null,
           },
-          files: newPost.file,
+          files: newPost.files,
           // fil
         };
         return {
@@ -111,7 +112,7 @@ function Form() {
 
   const getDetails = api.post.getDetails.useQuery();
 
-  async function compress(imageFile: File) {
+  async  function compress(imageFile: File) {
     const options = {
       maxSizeMB: 0.5,
       maxWidthOrHeight: 1920,
