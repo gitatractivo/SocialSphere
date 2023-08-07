@@ -75,7 +75,7 @@ type SessionUpdate ={
 }
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    jwt: ({ token, user, session: SessionUpdate, trigger }) => {
+    jwt: ({ token, user, session, trigger }) => {
       // console.log(
       //   "jwt callback",
       //   "session",
@@ -129,14 +129,17 @@ export const authOptions: NextAuthOptions = {
 
       const data = {
         ...session,
-        user: {
-          id: token.user.id,
-          email: token.user.email,
-          username: token.user.username,
-          image: token.user.image,
-          name: token.user.name,
-        },
+        
       };
+      if(!!token.user){
+        data.user =  {
+          id: token?.user.id as string,
+          email: token?.user.email,
+          username: token?.user.username as string,
+          image: token?.user.image,
+          name: token?.user.name,
+        }
+      }
       // console.log("session data",data)
       // console.log("\n\n after auth", session, "after auth");
 
