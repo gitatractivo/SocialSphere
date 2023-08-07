@@ -26,7 +26,7 @@ import { AdapterUser } from "next-auth/adapters";
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
-      id?: string | null;
+      id: string;
       username?: string | null;
       // ...other properties
       // role: UserRole;
@@ -34,7 +34,7 @@ declare module "next-auth" {
   }
 
   interface User {
-    id?: string | null;
+    id: string ;
     username?: string | null;
     name?: string | null;
     email?: string | null;
@@ -45,7 +45,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      id?: string | null;
+      id: string;
       username?: string | null;
     };
     id: string;
@@ -58,7 +58,7 @@ declare module "next-auth/jwt" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      id?: string | null;
+      id: string;
       username?: string | null;
     };
     id: string;
@@ -72,10 +72,7 @@ declare module "next-auth/jwt" {
  * 
  */
 
-type SessionUpdate ={
-  username?: string;
-  image?: string;
-}
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: ({ token, user, session, trigger }) => {
@@ -90,7 +87,13 @@ export const authOptions: NextAuthOptions = {
       // );
       if (user && !!user.id) {
         token.id = user.id;
-        token.user = user;
+        token.user = {
+          id: user.id ,
+          email: user.email,
+          username: user.username,
+          image: user.image,
+          name: user.name,
+        };
       }
       if (trigger === "update" && token.user !== undefined) {
         if (session?.username) {
@@ -107,10 +110,17 @@ export const authOptions: NextAuthOptions = {
             ...token,
             user: {
               ...token.user,
+              id: token.user?.id as string,
               image: session?.image as string,
             },
           };
       }
+      /**
+       * Type '{ image: string | undefined; name?: string | null | undefined; email?: string | null | undefined; id?: string | undefined; username?: string | null | undefined; }' is not assignable to type '{ name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; id: string; username?: string | null | undefined; }'.
+  Types of property 'id' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+       * **/
 
       return token;
     },
