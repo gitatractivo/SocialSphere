@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
       // );
       if (user) {
         token.id = user.id;
-        token.user = user ;
+        token.user = user;
       }
       if (trigger === "update" && token.user !== undefined) {
         if (session?.username) {
@@ -128,16 +128,15 @@ export const authOptions: NextAuthOptions = {
 
       const data = {
         ...session,
-        
       };
-      if(!!token.user){
-        data.user =  {
+      if (!!token.user) {
+        data.user = {
           id: token?.user.id as string,
           email: token?.user.email,
           username: token?.user.username as string,
           image: token?.user.image,
           name: token?.user.name,
-        }
+        };
       }
       // console.log("session data",data)
       // console.log("\n\n after auth", session, "after auth");
@@ -165,6 +164,7 @@ export const authOptions: NextAuthOptions = {
         },
         password: { label: "Password", type: "password" },
       },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       authorize: async (
         credentials: Record<"email" | "password", string> | undefined,
         _request: unknown
