@@ -56,7 +56,7 @@ export default function UserNameImageInput() {
   const [variant, setVariant] = useState<Variant>("LOGIN");
   const [isLoading, setIsLoading] = useState(false);
   const [available, setAvailable] = useState<(typeof AVAILABLE)[number]>(null);
-  const [username, setUsername] = useState(session.data?.user.username);
+  const [username, setUsername] = useState(session.data?.user.username as string);
   const [userImage, SetuserImage] = useState(session.data?.user.image);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
