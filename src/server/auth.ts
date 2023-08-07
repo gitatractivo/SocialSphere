@@ -14,7 +14,8 @@ import GoogleProvider from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import * as z from "zod";
 import { NewSession } from "../utils/types";
-import { DefaultJWT } from "next-auth/jwt";
+import { DefaultJWT, JWT } from "next-auth/jwt";
+import { AdapterUser } from "next-auth/adapters";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -36,20 +37,45 @@ declare module "next-auth" {
     id: string;
     username: string;
   }
-  interface JWT extends DefaultJWT {
-    user: User;
+  interface JWT {
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      id?: string | null;
+      username?: string | null;
+    };
     id: string;
   }
 }
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      id?: string | null;
+      username?: string | null;
+    };
+    id: string;
+  }
+}
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
  * @see https://next-auth.js.org/configuration/options
+ * 
+ * 
  */
+
+type SessionUpdate ={
+  username?: string;
+  image?: string;
+}
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    jwt:  ({ token, user,session,trigger }) => {
+    jwt: ({ token, user, session: SessionUpdate, trigger }) => {
       // console.log(
       //   "jwt callback",
       //   "session",
@@ -61,20 +87,32 @@ export const authOptions: NextAuthOptions = {
       // );
       if (user) {
         token.id = user.id;
-        token.user = user;
+        token.user = user as User;
       }
-       if (trigger === "update") {
-         // You can update the session in the database if it's not already updated.
-         // await adapter.updateUser(session.user.id, { name: newSession.name })
-
-         // Make sure the updated value is reflected on the client
-         if (session?.username) token?.user.username = session.username;
-         if (session?.image) token?.user.image = session.image;
-       }
+      if (trigger === "update" && token.user !== undefined) {
+        if (session?.username) {
+          token = {
+            ...token,
+            user: {
+              ...token.user,
+              username: session?.username as string,
+            },
+          };
+        }
+        l;
+        if (session?.image)
+          token = {
+            ...token,
+            user: {
+              ...token.user,
+              image: session?.image as string,
+            },
+          };
+      }
 
       return token;
     },
-    session: ({ session, user, trigger, newSession,token }) => {
+    session: ({ session, user, trigger, newSession, token }) => {
       // console.log(
       //   "session callback",
       //   "session",
@@ -89,13 +127,12 @@ export const authOptions: NextAuthOptions = {
       //   session.id = token.id;
       // }
 
-     
       const data = {
         ...session,
         user: {
           id: token.user.id,
           email: token.user.email,
-          username: token.user.username ,
+          username: token.user.username,
           image: token.user.image,
           name: token.user.name,
         },
