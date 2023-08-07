@@ -76,8 +76,8 @@ const PostPage: NextPage<
         <Link href={`/post/${id}`}>
           <p className="whitespace-pre-wrap">{post.content}</p>
           <p className="flex gap-4">
-            {post.file?.length > 0 &&
-              post.file?.map((fileN:File) => {
+            {post.files?.length > 0 &&
+              post.files?.map((fileN:File) => {
                 return (
                   <Image
                     src={fileN.url}
