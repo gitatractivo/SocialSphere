@@ -87,7 +87,7 @@ export const authOptions: NextAuthOptions = {
       // );
       if (user) {
         token.id = user.id;
-        token.user = user as User;
+        token.user = user ;
       }
       if (trigger === "update" && token.user !== undefined) {
         if (session?.username) {
