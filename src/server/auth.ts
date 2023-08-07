@@ -32,14 +32,14 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   id: string;
-  //   username: string;
-  // }
-  // interface JWT extends DefaultJWT {
-  //   user: User;
-  //   id: string;
-  // }
+  interface User {
+    id: string;
+    username: string;
+  }
+  interface JWT extends DefaultJWT {
+    user: User;
+    id: string;
+  }
 }
 
 /**
@@ -68,8 +68,8 @@ export const authOptions: NextAuthOptions = {
          // await adapter.updateUser(session.user.id, { name: newSession.name })
 
          // Make sure the updated value is reflected on the client
-         if (session.username) token.user.username = session.username;
-         if (session.image) token.user.image = session.image;
+         if (session?.username) token?.user.username = session.username;
+         if (session?.image) token?.user.image = session.image;
        }
 
       return token;
