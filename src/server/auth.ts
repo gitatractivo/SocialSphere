@@ -99,7 +99,6 @@ export const authOptions: NextAuthOptions = {
             },
           };
         }
-        l;
         if (session?.image)
           token = {
             ...token,
