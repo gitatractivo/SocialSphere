@@ -96,21 +96,25 @@ export const authOptions: NextAuthOptions = {
         };
       }
       if (trigger === "update" && token.user !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         if (session?.username) {
           token = {
             ...token,
             user: {
               ...token.user,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
               username: session?.username as string,
             },
           };
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         if (session?.image)
           token = {
             ...token,
             user: {
               ...token.user,
               id: token.user?.id as string,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
               image: session?.image as string,
             },
           };
@@ -144,7 +148,8 @@ export const authOptions: NextAuthOptions = {
       };
       if (!!token.user) {
         data.user = {
-          id: token?.user.id as string,
+          
+          id: token?.user.id ,
           email: token?.user.email,
           username: token?.user.username as string,
           image: token?.user.image,

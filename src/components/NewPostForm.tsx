@@ -89,7 +89,7 @@ function Form() {
           repostCount: 0,
           likedByMe: false,
           user: {
-            id: session.data.user?.id as string,
+            id: session.data.user?.id ,
             name: session.data.user.name || null,
             image: session.data.user.image || null,
           },
