@@ -26,16 +26,19 @@ import { AdapterUser } from "next-auth/adapters";
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
-      id: string;
-      username: string;
+      id?: string | null;
+      username?: string | null;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
   }
 
   interface User {
-    id: string;
-    username: string;
+    id?: string | null;
+    username?: string | null;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
   }
   interface JWT {
     user?: {
@@ -85,7 +88,7 @@ export const authOptions: NextAuthOptions = {
       //   "user",
       //   user
       // );
-      if (user) {
+      if (user && !!user.id) {
         token.id = user.id;
         token.user = user;
       }
@@ -196,7 +199,13 @@ export const authOptions: NextAuthOptions = {
         }
         console.log("authorised", user);
 
-        return user;
+        return {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          image: user.image,
+          name: user.name,
+        };
       },
     }),
   ],
