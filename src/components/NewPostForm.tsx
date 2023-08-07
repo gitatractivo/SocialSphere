@@ -85,14 +85,15 @@ function Form() {
         const newCachePost = {
           ...newPost,
           likeCount: 0,
-          commentCount:0,
-          repostCount:0,
+          commentCount: 0,
+          repostCount: 0,
           likedByMe: false,
           user: {
-            id: session.data.user.id,
+            id: session.data.user?.id as string,
             name: session.data.user.name || null,
             image: session.data.user.image || null,
           },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
           files: newPost.files,
           // fil
         };
