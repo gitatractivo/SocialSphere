@@ -2,36 +2,18 @@ import { Prisma } from "@prisma/client";
 import { inferAsyncReturnType } from "@trpc/server";
 import { z } from "zod";
 import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
   createTRPCContext,
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
 } from "~/server/api/trpc";
 import cloudinary from "~/server/cloudinary";
-import formidable, { IncomingForm } from "formidable";
-import { type UploadApiResponse } from "cloudinary";
 import { FileInput } from "~/utils/types";
 // import IncomingForm from "formidable/Formidable";
-import { connect } from 'http2';
 // import tIncomingForm from 'formidable/Formidable';
 // import IncomingForm from "formidable/Formidable";
 
-interface CloudinaryImageResponse {
-  public_id: string;
-  version: string;
-  signature: string;
-  width: number;
-  height: number;
-  format: string;
-  resource_type: string;
-  created_at: string;
-  tags: string[];
-  bytes: number;
-  type: string;
-  url: string;
-  secure_url: string;
-  original_filename: string;
-}
+
 
 export const postRouter = createTRPCRouter({
   infiniteProfileFeed: publicProcedure
@@ -161,6 +143,7 @@ export const postRouter = createTRPCRouter({
           post = await ctx.prisma.post.update({
             where: { id: post.id },
             data: {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               repostTo:{connect:{id: OriginalPostId!}}
             },
             include:{
@@ -172,11 +155,12 @@ export const postRouter = createTRPCRouter({
           post = await ctx.prisma.post.update({
             where: { id: post.id },
             data: {
-              commentTO:{connect:{id: OriginalPostId!}}
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              commentTO: { connect: { id: OriginalPostId! } },
             },
-            include:{
-              files: true
-            }
+            include: {
+              files: true,
+            },
           });
         }
         
