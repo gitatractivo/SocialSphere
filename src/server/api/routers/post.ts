@@ -12,6 +12,7 @@ import formidable, { IncomingForm } from "formidable";
 import { type UploadApiResponse } from "cloudinary";
 import { FileInput } from "~/utils/types";
 // import IncomingForm from "formidable/Formidable";
+import { connect } from 'http2';
 // import tIncomingForm from 'formidable/Formidable';
 // import IncomingForm from "formidable/Formidable";
 
@@ -129,20 +130,12 @@ export const postRouter = createTRPCRouter({
         // const filesjson:string[] = JSON.parse(files as string)
         //cloudinary
 
-        const post = await ctx.prisma.post.create({
+        let post = await ctx.prisma.post.create({
           data: {
             ...(content ? { content } : {}),
-            userId: ctx.session.user.id ,
-            ...(isComment
-              ? {
-                  commentToId: OriginalPostId,
-                }
-              : {}),
-            ...(isRepost
-              ? {
-                  repostToId: OriginalPostId,
-                }
-              : {}),
+            userId: ctx.session.user.id,
+            
+
             files: {
               create: files?.map((file) => {
                 return {
@@ -162,8 +155,31 @@ export const postRouter = createTRPCRouter({
             files: true,
           },
         });
-        console.log(post);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
+
+        if(isRepost){
+          post = await ctx.prisma.post.update({
+            where: { id: post.id },
+            data: {
+              repostTo:{connect:{id: OriginalPostId!}}
+            },
+            include:{
+              files: true
+            }
+          });
+        }
+        if(isComment){
+          post = await ctx.prisma.post.update({
+            where: { id: post.id },
+            data: {
+              commentTO:{connect:{id: OriginalPostId!}}
+            },
+            include:{
+              files: true
+            }
+          });
+        }
+        
         return { post };
       }
     ),
@@ -315,3 +331,4 @@ async function getInfinitePosts({
     nextCursor,
   };
 }
+

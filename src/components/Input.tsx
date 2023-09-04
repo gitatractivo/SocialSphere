@@ -36,7 +36,7 @@ const Input: React.FC<InputProps> = ({
       setPasswordShown(!passwordShown);
     };
   return (
-    <div>
+    <div className="group/form">
       <label
         htmlFor={id}
         className="
@@ -45,13 +45,14 @@ const Input: React.FC<InputProps> = ({
           font-medium 
           leading-6 
           text-gray-900
+          
         "
       >
         {label}
       </label>
       <div
         className={clsx(
-          `form-input group 
+          ` form-input  
           mt-1     
           flex  
             w-full 
@@ -66,6 +67,12 @@ const Input: React.FC<InputProps> = ({
             ring-inset 
             ring-gray-300 
             placeholder:text-gray-400 
+            group-hover/form:ring-rose-500z
+            group-focus/form:ring-blue-500
+            group-active/form:ring-rose-500
+            peer-focus/form:ring-blue-500
+
+
             
             sm:text-sm 
             sm:leading-6 `,
@@ -85,6 +92,8 @@ const Input: React.FC<InputProps> = ({
           className={clsx(
             `
             form-input
+            group/form
+            peer
             block 
             w-full 
             rounded-md 
@@ -93,9 +102,8 @@ const Input: React.FC<InputProps> = ({
             text-gray-900 
             outline-none 
             placeholder:text-gray-400 
-            focus:ring-inset 
-            focus:ring-sky-600 
-            group-focus:ring-2 
+            group-focus/form:ring-blue-500
+
             sm:text-sm 
             sm:leading-6`,
             // errors[id] && "focus:ring-rose-500",

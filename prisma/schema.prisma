@@ -44,10 +44,10 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String         @id @default(cuid())
     name          String?
-    email         String?   @unique
-    username      String?    @unique
+    email         String?        @unique
+    username      String?        @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
@@ -55,25 +55,27 @@ model User {
     posts         Post[]
     likes         Like[]
     password      String?
-
-    followers User[] @relation(name: "Followers")
-    following User[] @relation(name: "Followers")
+    followers     User[]         @relation(name: "Followers")
+    following     User[]         @relation(name: "Followers")
+    chats         UsersOnChats[]
+    messages      Message[]
 }
 
 model Post {
-    id          String   @id @default(cuid())
-    createdAt   DateTime @default(now())
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
     content     String?
     userId      String
-    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     likes       Like[]
     commentToId String?
-    commentTO   Post?    @relation(name: "comments", fields: [commentToId], references: [id], onDelete: Cascade)
-    comments    Post[]   @relation(name: "comments")
+    commentTO   Post?     @relation(name: "comments", fields: [commentToId], references: [id], onDelete: Cascade)
+    comments    Post[]    @relation(name: "comments")
     repostToId  String?
-    repostTo    Post?    @relation(name: "repost", fields: [repostToId], references: [id])
-    reposts     Post[]   @relation(name: "repost")
+    repostTo    Post?     @relation(name: "repost", fields: [repostToId], references: [id])
+    reposts     Post[]    @relation(name: "repost")
     files       File[]
+    Message     Message[]
 
     @@unique([createdAt, id])
 }
@@ -93,6 +95,22 @@ model File {
     post      Post     @relation(fields: [postId], references: [id])
 }
 
+model MessageFile {
+    id        String   @id @default(cuid())
+    type      String
+    url       String
+    name      String
+    extension String
+    mime      String
+    size      Int
+    height    Int?
+    width     Int?
+    createdAt DateTime @default(now())
+
+    Message   Message @relation(fields: [messageId], references: [id])
+    messageId String
+}
+
 model Like {
     userId String
     postId String
@@ -100,6 +118,38 @@ model Like {
     post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
     @@id([userId, postId])
+}
+
+model Chat {
+    id        String         @id @default(cuid())
+    messages  Message[]
+    users     UsersOnChats[]
+    createdAt DateTime       @default(now())
+    updatedAt DateTime       @updatedAt
+}
+
+model UsersOnChats {
+    id        String         @id @default(cuid())
+    userId String
+    chatId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+    // @@id([userId, chatId])
+}
+
+model Message {
+    id        String        @id @default(cuid())
+    chatId    String
+    chat      Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    userId    String
+    user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    hasSeen   Boolean       @default(false)
+    files     MessageFile[]
+    createdAt DateTime      @default(now())
+    post      Post?         @relation(fields: [postId], references: [id])
+    postId    String?
+    text      String
 }
 
 model VerificationToken {

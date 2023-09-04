@@ -117,6 +117,10 @@ export const profileRouter = createTRPCRouter({
       return {
         status: 201,
         message: "Image updated successfully",
+        result: {
+          image: result.image,
+          
+        },
       };
     }),
   chageOrCreateUserName: protectedProcedure
@@ -145,6 +149,10 @@ export const profileRouter = createTRPCRouter({
       return {
         status: 201,
         message: "Username updated successfully",
+        result: {
+          
+          username: result.username,
+        },
       };
     }),
   createUsernameOrImage: protectedProcedure
@@ -167,6 +175,7 @@ export const profileRouter = createTRPCRouter({
       const result = await ctx.prisma.user.update({
         where: { id: userId },
         data: { image: image?.url, username },
+        
       });
       return {
         status: 201,
