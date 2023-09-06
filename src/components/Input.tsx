@@ -6,7 +6,7 @@ import { ILogin } from "~/utils/types";
 import { BiHide , BiShow} from 'react-icons/bi/';
 import { CiCircleCheck, CiCircleRemove } from "react-icons/ci/";
 import { useState } from "react";
-import { AVAILABLE } from "./SIgnUp";
+import { AVAILABLE } from "./auth/SIgnUp";
 import { CircularProgress } from "@mui/material";
 
 interface InputProps {

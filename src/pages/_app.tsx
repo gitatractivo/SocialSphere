@@ -24,9 +24,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="container mx-auto flex items-start sm:pr-4">
+      <div className="container mx-auto flex items-start gap-0 justify-center sm:pr-4">
         {isEnterRoute ? null : <SideNav />}
-        <div className="mx-auto min-h-screen max-w-3xl flex-grow border-x">
+        <div className="mx-auto min-h-screen  flex-grow border-x">
           <Component {...pageProps} />
         </div>
       </div>

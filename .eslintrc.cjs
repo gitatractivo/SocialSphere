@@ -7,6 +7,7 @@ const config = {
     {
       extends: [
         "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "next",
       ],
       files: ["*.ts", "*.tsx"],
       parserOptions: {
@@ -27,6 +28,8 @@ const config = {
     "@typescript-eslint/no-unsafe-return": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/restrict-plus-operands": "off",
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-page-custom-font": "off",
   },
 };
 

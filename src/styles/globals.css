@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.MuiAccordionSummary-content{
+    max-height: 32px !important;
+    margin: 0!important;
+}
+
+.MuiAccordionSummary-gutters{
+    max-height: 32px!important;
+    margin: 0!important;
+}

@@ -10,7 +10,8 @@ import ErrorPage from 'next/error';
 import Link from "next/link";
 import { ProfileImage } from "~/components/ProfileImage";
 import Image from "next/image";
-import { File, HeartButton } from "~/components/InfinitePostsList";
+import { File } from "~/components/post/Posts";
+import { HeartButton } from "~/components/post/Buttons";
 
 
 

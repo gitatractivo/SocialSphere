@@ -1,9 +1,9 @@
 import { NextPageContext, type NextPage } from "next";
-import { InfinitePostsList, Post } from "~/components/InfinitePostsList";
-import { NewPostForm } from "~/components/NewPostForm";
+import { CreatePost } from "~/components/post/CreatePost";
 import { getSession, useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { useState } from "react";
+import { Posts, Post } from "~/components/post/Posts";
 
 const TABS = ["Recent", "Following"] as const;
 
@@ -11,48 +11,49 @@ const Home: NextPage = () => {
   const [selectedTab, setSelectedTab] =
     useState<(typeof TABS)[number]>("Recent");
   const session = useSession();
-  console.log(session,"session")
+  console.log(session, "session");
   console.log(session?.data?.user?.username, "session");
-  
+
   return (
-    <>
-      <header className="sticky top-0 z-10 bg-white pt-2">
-        {/* <h1 className="mb-2 px-4 text-lg font-bold">Home</h1> */}
-      </header>
-      {session.status === "authenticated" && !!session.data.user.username && (
-        <div className="flex">
-          {TABS.map((tab) => {
-            return (
-              <button
-                key={tab}
-                className={`flex-grow p-2 hover:bg-gray-200 focus-visible:bg-gray-200 ${
-                  tab === selectedTab
-                    ? "border-b-4 border-blue-500 font-bold "
-                    : "border-b-2 border-slate-200"
-                }`}
-                onClick={() => setSelectedTab(tab)}
-              >
-                {tab}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      <NewPostForm />
-      {selectedTab === "Recent"?<RecentPosts />: <FollowingPosts/>}
-    </>
+    <div className="flex gap-0">
+      <div className="w-[650px] border-2 ">
+        <header className="sticky top-0 z-10  bg-white pt-2">
+          {/* <h1 className="mb-2 px-4 text-lg font-bold">Home</h1> */}
+        </header>
+        {session.status === "authenticated" && !!session.data.user.username && (
+          <div className="flex">
+            {TABS.map((tab) => {
+              return (
+                <button
+                  key={tab}
+                  className={`flex-grow p-2 hover:bg-gray-200 focus-visible:bg-gray-200 ${
+                    tab === selectedTab
+                      ? "border-b-4 border-blue-500 font-bold "
+                      : "border-b-2 border-slate-200"
+                  }`}
+                  onClick={() => setSelectedTab(tab)}
+                >
+                  {tab}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <CreatePost />
+        {selectedTab === "Recent" ? <RecentPosts /> : <FollowingPosts />}
+      </div>
+    </div>
   );
 };
 
 function RecentPosts() {
-  
   const posts = api.post.infiniteFeed.useInfiniteQuery(
     {},
     { getNextPageParam: (lastPage) => lastPage.nextCursor }
   );
 
   return (
-    <InfinitePostsList
+    <Posts
       posts={posts.data?.pages.flatMap((page) => page.posts as Post[])}
       isError={posts.isError}
       isLoading={posts.isLoading}
@@ -69,10 +70,8 @@ function FollowingPosts() {
   );
 
   return (
-    <InfinitePostsList
-      posts={posts.data?.pages.flatMap(
-        (page) => page.posts as Post[]
-      )}
+    <Posts
+      posts={posts.data?.pages.flatMap((page) => page.posts as Post[])}
       isError={posts.isError}
       isLoading={posts.isLoading}
       hasMore={posts.hasNextPage || false}

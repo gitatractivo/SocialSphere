@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
-import AuthForm from "~/components/AuthForm";
+import AuthForm from "~/components/auth/AuthForm";
 import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import UserNameImageInput from "~/components/UserNameImageInput";
+import UserNameImageInput from "~/components/auth/UserNameImageInput";
 import { NextPageContext } from "next";
 
 export default function Enter() {

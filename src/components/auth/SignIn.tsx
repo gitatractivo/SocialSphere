@@ -1,12 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
-import { loginSchema } from "~/utils/types";
-import { ILogin } from "../utils/types";
-import { Button } from "./Button";
-import Input from "./Input";
-import { constants } from "crypto";
+import { useForm } from "react-hook-form";
+import { ILogin, loginSchema } from "~/utils/types";
+import { Button } from "../Button";
+import Input from "../Input";
 
 const SignIn = ({
   isLoading,
@@ -16,10 +14,10 @@ const SignIn = ({
   setIsLoading: (isLoading: boolean) => void;
 }) => {
   const router = useRouter();
-  const session = useSession();
+  // const session = useSession();
   const {
     register,
-    handleSubmit,
+    // handleSubmit,
     formState: { errors },
     watch,
   } = useForm<ILogin>({

@@ -6,7 +6,7 @@ import {
 } from "~/server/api/trpc";
 import { pusherServer } from "~/utils/pusher";
 import { FileInput } from "~/utils/types";
-import { Post,File } from "~/components/InfinitePostsList";
+import { Post,File } from "~/components/post/Posts";
 
 export const messageRouter = createTRPCRouter({
   create: protectedProcedure

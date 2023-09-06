@@ -14,7 +14,7 @@ import { VscArrowLeft } from "react-icons/vsc";
 import { ProfileImage } from "~/components/ProfileImage";
 import { useSession } from "next-auth/react";
 import { Button } from "~/components/Button";
-import { InfinitePostsList, Post } from "~/components/InfinitePostsList";
+import { Posts, Post } from "~/components/post/Posts";
 
 const ProfilePage: NextPage<
   InferGetServerSidePropsType<typeof getServerSideProps>
@@ -74,7 +74,7 @@ const ProfilePage: NextPage<
       </header>
 
       <main>
-        <InfinitePostsList
+        <Posts
           posts={posts.data?.pages.flatMap((page) => page.posts as Post[])}
           isError={posts.isError}
           isLoading={posts.isLoading}

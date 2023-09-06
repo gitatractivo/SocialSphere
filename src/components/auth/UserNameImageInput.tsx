@@ -1,33 +1,34 @@
+import {
+  Avatar,
+  Backdrop,
+  Box,
+  CircularProgress,
+  Fade,
+  Modal,
+} from "@mui/material";
+import clsx from "clsx";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import "react-image-crop/dist/ReactCrop.css";
 import {
-  FormEventHandler,
-  useCallback,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
-import { AVAILABLE } from "./SIgnUp";
-import imageCompression from "browser-image-compression";
-import Input from "./Input";
-import { Button } from "./Button";
-import { api } from "~/utils/api";
-import { v4 as uuid } from "uuid";
-import clsx from "clsx";
-import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
 import { AiFillCamera } from "react-icons/ai";
-import { ImCross ,ImCheckmark } from "react-icons/im";
-import { Avatar, Backdrop, Box, CircularProgress, Fade, Modal } from "@mui/material";
+import { CiCircleCheck, CiCircleRemove } from "react-icons/ci";
+import { ImCheckmark, ImCross } from "react-icons/im";
 import ReactCrop, {
-  centerCrop,
-  makeAspectCrop,
   Crop,
   PixelCrop,
-  convertToPixelCrop,
+  centerCrop,
+  makeAspectCrop
 } from "react-image-crop";
-import { FileAndAttachment } from "./NewPostForm";
+import "react-image-crop/dist/ReactCrop.css";
+import { v4 as uuid } from "uuid";
+import { api } from "~/utils/api";
 import { IFile } from "~/utils/types";
+import { Button } from "../Button";
+import { AVAILABLE } from "./SIgnUp";
 
 type Variant = "LOGIN" | "REGISTER";
 function centerAspectCrop(
@@ -56,18 +57,22 @@ export default function UserNameImageInput() {
   const [variant, setVariant] = useState<Variant>("LOGIN");
   const [isLoading, setIsLoading] = useState(false);
   const [available, setAvailable] = useState<(typeof AVAILABLE)[number]>(null);
-  const [username, setUsername] = useState(session.data?.user.username as string);
+  const [username, setUsername] = useState(
+    session.data?.user.username as string
+  );
   const [userImage, SetuserImage] = useState(session.data?.user.image);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [scale, setScale] = useState(1);
   const [imgSrc, setImgSrc] = useState("");
   const [open, setOpen] = useState(false);
-  const [imageCHange, setImageCHange] = useState(false)
+  const [imageCHange, setImageCHange] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // Call useQuery directly inside the component
-  const resp = api.profile.findUsernameExists.useQuery({ ...(!!username?{username}:{}) });
+  const resp = api.profile.findUsernameExists.useQuery({
+    ...(!!username ? { username } : {}),
+  });
 
   useEffect(() => {
     if (!username) {
@@ -82,14 +87,13 @@ export default function UserNameImageInput() {
 
   const { mutateAsync, mutate } =
     api.profile.createUsernameOrImage.useMutation();
-  
+
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     if (1) {
       const { width, height } = e.currentTarget;
       setCrop(centerAspectCrop(width, height, 1));
     }
   }
- 
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -97,70 +101,66 @@ export default function UserNameImageInput() {
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         setImgSrc(reader.result?.toString() || "");
-        setOpen(true)
+        setOpen(true);
       });
       reader.readAsDataURL(e?.target?.files[0] as File);
     }
   };
 
- const handleCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
-   if (completedCrop?.width && completedCrop?.height) {
-     const canvas = document.createElement("canvas");
-     const image = new Image();
-     image.src = imgSrc;
+  const handleCheck = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (completedCrop?.width && completedCrop?.height) {
+      const canvas = document.createElement("canvas");
+      const image = new Image();
+      image.src = imgSrc;
 
-     canvas.width = completedCrop.width;
-     canvas.height = completedCrop.height;
+      canvas.width = completedCrop.width;
+      canvas.height = completedCrop.height;
 
-     const ctx = canvas.getContext("2d");
-     if (ctx && completedCrop.width && completedCrop.height) {
-       // Calculate the actual size of the image
-       const actualWidth = imgRef.current?.naturalWidth || completedCrop.width;
-       const actualHeight =
-         imgRef.current?.naturalHeight || completedCrop.height;
+      const ctx = canvas.getContext("2d");
+      if (ctx && completedCrop.width && completedCrop.height) {
+        // Calculate the actual size of the image
+        const actualWidth = imgRef.current?.naturalWidth || completedCrop.width;
+        const actualHeight =
+          imgRef.current?.naturalHeight || completedCrop.height;
 
-       // Calculate the scale factor based on the actual size and displayed size
-       const scaleX = actualWidth / (imgRef.current?.width || 1);
-       const scaleY = actualHeight / (imgRef.current?.height || 1);
+        // Calculate the scale factor based on the actual size and displayed size
+        const scaleX = actualWidth / (imgRef.current?.width || 1);
+        const scaleY = actualHeight / (imgRef.current?.height || 1);
 
-       ctx.drawImage(
-         image,
-         completedCrop.x * scaleX,
-         completedCrop.y * scaleY,
-         completedCrop.width * scaleX,
-         completedCrop.height * scaleY,
-         0,
-         0,
-         completedCrop.width,
-         completedCrop.height
-       );
+        ctx.drawImage(
+          image,
+          completedCrop.x * scaleX,
+          completedCrop.y * scaleY,
+          completedCrop.width * scaleX,
+          completedCrop.height * scaleY,
+          0,
+          0,
+          completedCrop.width,
+          completedCrop.height
+        );
 
-       const croppedImage = canvas.toDataURL("image/jpeg");
+        const croppedImage = canvas.toDataURL("image/jpeg");
 
-       // Set the cropped image to the userImage state
-       SetuserImage(croppedImage);
+        // Set the cropped image to the userImage state
+        SetuserImage(croppedImage);
 
-       // Close the modal after cropping
-       setOpen(false);
-       setImageCHange(true)
-     }
-   }
- };
-
-
-  const handleCross = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setImgSrc( "");
-    setOpen(false);
+        // Close the modal after cropping
+        setOpen(false);
+        setImageCHange(true);
+      }
+    }
   };
 
-
+  const handleCross = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setImgSrc("");
+    setOpen(false);
+  };
 
   const getDetails = api.post.getDetails.useQuery();
 
   const url = `https://api.cloudinary.com/v1_1/${
     getDetails?.data?.cloudName as string
   }/image/upload`;
-  
 
   const upload = async (attachment: Blob) => {
     const formData = new FormData();
@@ -185,47 +185,41 @@ export default function UserNameImageInput() {
     return resp.json();
   };
 
-
-
-  const onSubmit =  async(e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let attactment:IFile | undefined
-    if(imageCHange){
+    let attactment: IFile | undefined;
+    if (imageCHange) {
       const imageBlob = await fetch(userImage as string).then((res) =>
         res.blob()
       );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       attactment = await upload(imageBlob);
     }
-    if(!username){
-      alert("Username Required")
+    if (!username) {
+      alert("Username Required");
       return;
     }
 
-
     const resp = await mutateAsync({
-      ...(username===session.data?.user.username?{username}:{}),
-      userId:session.data?.user.id as string,
+      ...(username === session.data?.user.username ? { username } : {}),
+      userId: session.data?.user.id as string,
       ...(!!attactment && imageCHange ? { image: attactment } : {}),
     });
-    if(resp.status===201){
-      const result=resp.result;
-      void session.update({username:result.username,image:result.image})
+    if (resp.status === 201) {
+      const result = resp.result;
+      void session.update({ username: result.username, image: result.image });
     }
-
-    
-    
   };
 
   const style = {
-    position: "absolute" ,
+    position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
     // width: 400,
     bgcolor: "background.paper",
-    borderRadius:1,
+    borderRadius: 1,
     boxShadow: 24,
     p: 4,
   };

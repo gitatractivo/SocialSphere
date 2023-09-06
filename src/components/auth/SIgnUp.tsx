@@ -1,18 +1,14 @@
-import { api } from "~/utils/api";
-import { ISignUp, loginSchema, signUpSchema } from "~/utils/types";
-import { signIn, useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
-import {
-  Control,
-  FieldValues,
-  SubmitHandler,
-  useForm,
-  useWatch,
-} from "react-hook-form";
-import { useRouter } from "next/navigation";
-import { Button } from "./Button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "./Input";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  useForm
+} from "react-hook-form";
+import { api } from "~/utils/api";
+import { ISignUp, signUpSchema } from "~/utils/types";
+import { Button } from "../Button";
+import Input from "../Input";
 
 
 export const AVAILABLE = [true, false, "Loading", null] as const;

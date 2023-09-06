@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
-import { Button } from "./Button";
-import { ProfileImage } from "./ProfileImage";
+import { Button } from "../Button";
+import { ProfileImage } from "../ProfileImage";
 import {
   FormEvent,
   useCallback,
@@ -17,7 +17,7 @@ import { v4 as uuid } from "uuid";
 import crypto from "crypto";
 import imageCompression from "browser-image-compression";
 import { VscDeviceCamera } from "react-icons/vsc";
-import { IconHoverEffect } from './IconHoverEffect';
+import { IconHoverEffect } from "../IconHoverEffect";
 
 function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
   if (textArea == null) return;
@@ -44,7 +44,7 @@ function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
 
 export type FileAndAttachment = { file: File; url: string };
 
-export const NewPostForm = () => {
+export const CreatePost = () => {
   const session = useSession();
   if (session.status !== "authenticated") return null;
 
@@ -89,7 +89,7 @@ function Form() {
           repostCount: 0,
           likedByMe: false,
           user: {
-            id: session.data.user?.id ,
+            id: session.data.user?.id,
             name: session.data.user.name || null,
             image: session.data.user.image || null,
           },
@@ -113,7 +113,7 @@ function Form() {
 
   const getDetails = api.post.getDetails.useQuery();
 
-  async  function compress(imageFile: File) {
+  async function compress(imageFile: File) {
     const options = {
       maxSizeMB: 0.5,
       maxWidthOrHeight: 1920,
@@ -131,7 +131,7 @@ function Form() {
 
   const url = `https://api.cloudinary.com/v1_1/${
     getDetails?.data?.cloudName as string
-  }/image/upload`;
+  }/upload`;
 
   const upload = async (attachment: FileAndAttachment) => {
     const formData = new FormData();

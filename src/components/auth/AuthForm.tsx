@@ -1,7 +1,7 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { BsDiscord, BsGoogle } from "react-icons/bs";
 import AuthSocialButton from "./AuthSocialButton";
 import SignUp from "./SIgnUp";

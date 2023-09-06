@@ -1,11 +1,11 @@
 import classNames from "classnames";
-import { FileAndAttachment, RemoveAttachmentType } from "./NewPostForm";
-import { Button } from "./Button";
+import { FileAndAttachment, RemoveAttachmentType } from "./CreatePost";
+import { Button } from "../Button";
 import { VscClose } from "react-icons/vsc";
 import Image from "next/image";
 
 const Attachments: React.FC<{
-  attachments: FileAndAttachment[];
+  attachments: FileAndAttachment[] ;
   onRemoveAttachment?: RemoveAttachmentType;
 }> = ({ attachments, onRemoveAttachment }) => {
   const className = classNames("grid b-2 b-slate-900 gap-2 w-full h-full", {
