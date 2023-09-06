@@ -1,4 +1,4 @@
-import { MessageFile } from "@prisma/client";
+import { MessageFile, Prisma, User } from '@prisma/client';
 import { z } from "zod";
 import {
   createTRPCRouter,
@@ -74,14 +74,22 @@ export const messageRouter = createTRPCRouter({
           files: true,
         },
       });
-      // const messageWithRelations = await ctx.prisma.message.findUnique({
-      //   where: { id: message.id },
-      //   include: {
-      //     user: true,
-      //     post: true,
-      //     files: true,
-      //   },
-      // });
+
+      const friendHasSeen = await ctx.prisma.usersOnChats.updateMany({
+        where: {
+          chatId,
+          NOT: {
+            userId: currentUserId,
+          },
+        },
+        data: {
+          hasSeen: {
+            increment:1,
+            //            setNull:true //TODO uncomment when we have seen feature
+          },
+        },
+      });
+      
       const pusherPayload: messagePayloadPusher = {
         message: message.text,
         userId: message.userId,
@@ -174,6 +182,50 @@ export const messageRouter = createTRPCRouter({
       },
     });
 
+    
+
+    const hasSeenStatus = await ctx.prisma.usersOnChats.findFirst({
+      where:{
+        chatId,
+        userId: currentUserId,
+      },
+      select:{
+        hasSeen:true,
+        id: true,
+      }
+      
+    })
+
+    if(!!hasSeenStatus&& hasSeenStatus.hasSeen!==0){
+      await ctx.prisma.usersOnChats.updateMany({
+        where:{
+          id: hasSeenStatus.id,
+        },
+        data:{
+          hasSeen:0
+        }
+      })
+
+      //TODO: trigger that message has been seen
+    }
+
+    const friendHasSeen = await ctx.prisma.usersOnChats.findFirst({
+      where: {
+        chatId,
+        NOT: {
+          userId: currentUserId,
+        },
+      },
+      select: {
+        hasSeen: true,
+        id: true,
+      },
+    });
+
+
+    
+
+
     let nextCursor: typeof cursor | undefined;
     if (messages.length > limit) {
       const nextItem = messages.pop();
@@ -183,17 +235,21 @@ export const messageRouter = createTRPCRouter({
     }
 
     return {
-      messages: messages.map((message)=>{
-        return{
-          id:message.id,
-          text:message.text,
-          createdAt:message.createdAt,
-          user:message.userId,
-          post:message?.post as Post |null,
-          files:message?.files as File[] | null
-        }
-      }).reverse(),
+      messages: messages
+        .map((message) => {
+          return {
+            id: message.id,
+            text: message.text,
+            createdAt: message.createdAt,
+            user: message.userId,
+            post: message?.post as Post | null,
+            files: message?.files as File[] | null,
+          };
+        })
+        .reverse(),
       nextCursor,
+      hasSeen: hasSeenStatus?.hasSeen ??0,
+      friendHasSeen: friendHasSeen?.hasSeen ?? 0,
     };
   }),
 });

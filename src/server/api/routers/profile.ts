@@ -4,9 +4,14 @@ import { z } from "zod";
 import {
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure
+  publicProcedure,
 } from "~/server/api/trpc";
-import { FileInput, createUsernameOrImageSchema, signUpSchema } from "~/utils/types";
+import { prisma } from "~/server/db";
+import {
+  FileInput,
+  createUsernameOrImageSchema,
+  signUpSchema,
+} from "~/utils/types";
 
 export const profileRouter = createTRPCRouter({
   getById: publicProcedure
@@ -119,7 +124,6 @@ export const profileRouter = createTRPCRouter({
         message: "Image updated successfully",
         result: {
           image: result.image,
-          
         },
       };
     }),
@@ -150,7 +154,6 @@ export const profileRouter = createTRPCRouter({
         status: 201,
         message: "Username updated successfully",
         result: {
-          
           username: result.username,
         },
       };
@@ -158,13 +161,13 @@ export const profileRouter = createTRPCRouter({
   createUsernameOrImage: protectedProcedure
     .input(createUsernameOrImageSchema)
     .mutation(async ({ ctx, input: { image, userId, username } }) => {
-      console.log(userId)
+      console.log(userId);
       const user = await ctx.prisma.user.findFirst({
         where: {
           id: userId,
         },
       });
-      const userALl = await ctx.prisma.user.findMany({})
+      const userALl = await ctx.prisma.user.findMany({});
       console.log(user, userALl);
       if (!user) {
         throw new trpc.TRPCError({
@@ -175,15 +178,14 @@ export const profileRouter = createTRPCRouter({
       const result = await ctx.prisma.user.update({
         where: { id: userId },
         data: { image: image?.url, username },
-        
       });
       return {
         status: 201,
         message: "Image updated successfully",
-        result:{
+        result: {
           image: result.image,
-          username: result.username
-        }
+          username: result.username,
+        },
       };
     }),
   findUsernameExists: publicProcedure
@@ -212,4 +214,55 @@ export const profileRouter = createTRPCRouter({
         result: { usernameAvailable: !user },
       };
     }),
+  getChats: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number().optional(),
+        cursor: z.object({ id: z.string(), createdAt: z.date() }).optional(),
+      })
+    )
+    .query(async ({ input: { limit=10, cursor }, ctx }) => {
+      const currentUserId = ctx.session?.user.id;
+
+      const chats = await ctx.prisma.usersOnChats.findMany({
+        where: {
+          userId: currentUserId,
+        },
+        orderBy: [
+          {
+            chat: {
+              updatedAt: "desc",
+            },
+          },
+        ],
+        take: limit + 1,
+        cursor: cursor ? { createdAt_id: cursor } : undefined,
+        select: {
+          chat: {
+            select: {
+              id: true,
+              messages: {
+                take: 1,
+                orderBy: {
+                  createdAt: "desc",
+                },
+                select: {
+                  id: true,
+                  createdAt: true,
+                  text: true,
+                  postId: true,
+                  files: {
+                    select: {
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          hasSeen: true,
+        },
+      });
+    }),
+  
 });

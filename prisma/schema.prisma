@@ -129,27 +129,31 @@ model Chat {
 }
 
 model UsersOnChats {
-    id        String         @id @default(cuid())
-    userId String
-    chatId String
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    id      String @id @default(cuid())
+    userId  String
+    chatId  String
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    chat    Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    hasSeen Int    @default(0)
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    @@unique([createdAt, id])
 
-    // @@id([userId, chatId])
 }
 
 model Message {
-    id        String        @id @default(cuid())
-    chatId    String
-    chat      Chat          @relation(fields: [chatId], references: [id], onDelete: Cascade)
-    userId    String
-    user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-    hasSeen   Boolean       @default(false)
+    id     String @id @default(cuid())
+    chatId String
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
     files     MessageFile[]
     createdAt DateTime      @default(now())
     post      Post?         @relation(fields: [postId], references: [id])
     postId    String?
     text      String
+
     @@unique([createdAt, id])
 }
 
