@@ -39,7 +39,6 @@ const SignIn = ({
        ...data,
        redirect: false,
      });
-     console.log("resp",resp)
      if(resp?.ok){
 
        router.push('/')  

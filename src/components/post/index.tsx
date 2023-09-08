@@ -26,7 +26,6 @@ function Post({
   const trpcUtils = api.useContext();
   const toggleLike = api.post.toggleLike.useMutation({
     onSuccess: ({ addedLike }) => {
-      console.log(addedLike, "addedLike");
       const updateData: Parameters<
         typeof trpcUtils.post.infiniteProfileFeed.setInfiniteData
       >[1] = (oldData) => {
@@ -69,7 +68,7 @@ function Post({
   return (
     <li className="flex border-b px-4 py-4">
       <Link href={`/profiles/${user.id}`}>
-        <ProfileImage src={user.image} />
+        <ProfileImage src={user.image} className='drop-shadow-sm drop-shadow-white'/>
       </Link>
 
       <div className="ml-2 flex flex-grow flex-col">

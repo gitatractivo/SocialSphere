@@ -11,11 +11,9 @@ const Home: NextPage = () => {
   const [selectedTab, setSelectedTab] =
     useState<(typeof TABS)[number]>("Recent");
   const session = useSession();
-  console.log(session, "session");
-  console.log(session?.data?.user?.username, "session");
 
   return (
-    <div className="flex gap-0">
+    <div className="flex w-fit max-w-[1000px] gap-0">
       <div className="w-[650px] border-2 ">
         <header className="sticky top-0 z-10  bg-white pt-2">
           {/* <h1 className="mb-2 px-4 text-lg font-bold">Home</h1> */}
@@ -42,6 +40,7 @@ const Home: NextPage = () => {
         <CreatePost />
         {selectedTab === "Recent" ? <RecentPosts /> : <FollowingPosts />}
       </div>
+      <div className="w-[350px] max-w-[350px]"></div>
     </div>
   );
 };

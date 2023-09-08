@@ -8,8 +8,13 @@ import { MdOutlineMailOutline } from "react-icons/md";
 import { VscSignIn, VscSignOut } from "react-icons/vsc";
 import { Button } from "./Button";
 import { IconHoverEffect } from "./IconHoverEffect";
+import { useDarkMode } from "usehooks-ts";
+import DarkSwitch from "./DarkSwitch";
 
 // type Props = {}
+
+
+
 
 function SideNav() {
   const session = useSession();
@@ -134,6 +139,10 @@ function SideNav() {
             </Button>
           </li>
         )}
+          <li className="mx-auto w-11/12 my-2">
+            <DarkSwitch />
+          </li>
+        
       </ul>
     </nav>
   );

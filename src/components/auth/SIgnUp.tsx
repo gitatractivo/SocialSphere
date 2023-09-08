@@ -52,26 +52,17 @@ const SignUp = ({
   //  if(!resp.data) return;
    resp.data && username && setAvailable(resp.data?.result.usernameAvailable);
  }, [username, resp]);
- console.log(available,"available")
 
 
 
   const { mutateAsync, mutate } = api.profile.createUser.useMutation();
   const onSubmit= async(e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-      console.log("callback called")
       const email= watch("email")
       const password=  watch("password")
       const passwordConfirmation=  watch("passwordConfirmation")
       const name = watch("name");
-      console.log(
-        available,
-        username,
-        email,
-        password,
-        name,
-        passwordConfirmation
-      );
+      
       if (available !== true) {
         // Show an alert or handle the case where the username is not available
         alert("Username is not available.");
@@ -79,14 +70,12 @@ const SignUp = ({
       }
       const result = await mutateAsync({email,username,password,name,passwordConfirmation});
       if (result.status === 201) {
-        console.log("success")
         signIn("credentials", {
           email,
           password,
           redirect: false,
         })
           .then((callback) => {
-            console.log("inside callback",callback,session)
             if (callback?.error) {
               alert("Invalid");
             }

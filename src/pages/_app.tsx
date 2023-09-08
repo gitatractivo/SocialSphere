@@ -6,6 +6,7 @@ import "~/styles/globals.css";
 import Head from "next/head";
 import SideNav from "~/components/SideNav";
 import { useRouter } from "next/router";
+import { ThemeProvider } from "next-themes";
 
 
 const MyApp: AppType<{ session: Session | null }> = ({
@@ -14,22 +15,19 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   const router = useRouter();
   const isEnterRoute = router.pathname === "/enter";
+
+
   return (
     <SessionProvider session={session}>
-      <Head>
-        <title>SocialSphere</title>
-        <meta
-          name="description"
-          content="This is a basic social media application with chat functionality"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className="container mx-auto flex items-start gap-0 justify-center sm:pr-4">
-        {isEnterRoute ? null : <SideNav />}
-        <div className="mx-auto min-h-screen  flex-grow border-x">
-          <Component {...pageProps} />
+      <ThemeProvider attribute="class">
+        
+        <div className="container mx-auto flex w-fit items-start justify-center gap-0 sm:pr-4">
+          {isEnterRoute ? null : <SideNav />}
+          <div className=" min-h-screen w-fit max-w-[1000px]  flex-grow border-x">
+            <Component {...pageProps} />
+          </div>
         </div>
-      </div>
+      </ThemeProvider>
     </SessionProvider>
   );
 };

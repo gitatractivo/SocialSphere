@@ -11,3 +11,9 @@
     max-height: 32px!important;
     margin: 0!important;
 }
+
+@layer base{
+    body {
+        @apply dark:bg-gray-800 bg-white
+    }
+}

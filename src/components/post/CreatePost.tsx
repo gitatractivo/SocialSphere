@@ -74,7 +74,6 @@ function Form() {
 
   const createPost = api.post.create.useMutation({
     onSuccess: ({ post: newPost }) => {
-      console.log("fileResp", newPost);
       setInputValue("");
       setPreviewAttachments([]);
 
@@ -162,7 +161,6 @@ function Form() {
     const files = await Promise.all(
       previewAttachments.map((attachment) => upload(attachment))
     );
-    console.log(files);
 
     createPost.mutate({ content: inputValue, files });
   };
