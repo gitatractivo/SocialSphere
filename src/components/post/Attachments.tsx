@@ -42,7 +42,7 @@ export const Attachment: React.FC<{
     <div className={className}>
       {onRemoveAttachment && (
         <div className="absolute right-1 top-2 ">
-          <Button onClick={() => onRemoveAttachment(attachment)}>
+          <Button onClick={() => onRemoveAttachment(attachment)} small className="px-1">
             <VscClose />
           </Button>
         </div>

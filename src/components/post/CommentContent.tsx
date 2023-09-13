@@ -19,6 +19,7 @@ import imageCompression from "browser-image-compression";
 import { VscDeviceCamera } from "react-icons/vsc";
 import { IconHoverEffect } from "../IconHoverEffect";
 import { CircularProgress } from "@mui/material";
+import { Post } from "./Posts";
 
 function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
   if (textArea == null) return;
@@ -45,14 +46,36 @@ function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
 
 export type FileAndAttachment = { file: File; url: string };
 
-export const CreatePost = () => {
+export const CreatePost = ({
+  originalPost,
+  handleClose,
+}: {
+  originalPost: Post;
+  handleClose: () => void;
+}) => {
   const session = useSession();
   if (session.status !== "authenticated") return null;
-
-  return <Form />;
+  const {
+    id: originalPostId,
+    user,
+    content,
+    createdAt,
+    likeCount,
+    likedByMe,
+    files,
+  } = originalPost;
+  return <Form OriginalPostId={originalPostId} handleClose={handleClose} OriginalPost={originalPost} />;
 };
 
-function Form() {
+function Form({
+  OriginalPostId,
+  OriginalPost,
+  handleClose,
+}: {
+  OriginalPostId: string;
+  OriginalPost: Post;
+  handleClose: () => void;
+}) {
   const session = useSession();
   const [inputValue, setInputValue] = useState("");
   const [previewAttachments, setPreviewAttachments] = useState<
@@ -77,11 +100,36 @@ function Form() {
     onSuccess: ({ post: newPost }) => {
       setInputValue("");
       setPreviewAttachments([]);
+      handleClose();
 
       if (session.status !== "authenticated") return;
       trpcUtils.post.infiniteFeed.setInfiniteData({}, (oldData) => {
         if (oldData == null || oldData.pages[0] == null) return;
+
+        oldData.pages.map((page, index) => {
+          page.posts.map((post) => {
+            if (post.id === OriginalPostId) {
+              post.comments = [
+                ...post.comments,
+                {
+                  id:newPost.id,
+                  content: newPost.content,
+                  createdAt: newPost.createdAt,
+                  files: newPost.files,
+                  likeCount:0,
+                  commentCount:0,
+                  repostCount:0,
+                  likedByMe:false,
+                  user: newPost.user,
+                  
+                },
+              ];
+              post.commentCount++;
+            }
+          });
+        });
         
+
         const newCachePost = {
           ...newPost,
           likeCount: 0,
@@ -94,6 +142,9 @@ function Form() {
             image: session.data.user.image || null,
             username: session.data.user.username || null,
           },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+          files: newPost.files,
+          isComment: true,
           commentTO: {
             ...newPost.commentTO,
             likeCount: newPost.commentTO?._count.likes ?? 0,
@@ -147,8 +198,7 @@ function Form() {
               }),
             };
           }),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-          files: newPost.files,
+
           // fil
         };
         return {
@@ -217,7 +267,12 @@ function Form() {
       previewAttachments.map((attachment) => upload(attachment))
     );
 
-    createPost.mutate({ content: inputValue, files });
+    createPost.mutate({
+      content: inputValue,
+      files,
+      isComment: true,
+      OriginalPostId,
+    });
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -255,21 +310,21 @@ function Form() {
   return (
     <form
       onSubmit={(e) => void handleSubmit(e)}
-      className="flex flex-col gap-2 border-b-[0.25px] border-gray-700 px-4 py-2"
+      className="flex flex-col gap-2  py-2"
     >
-      <div className="flex gap-4">
+      <div className="flex gap-2">
         <ProfileImage src={session.data.user.image} />
-        <div className="flex w-full flex-col gap-1">
+        <div className="flex max-h-[424px] w-full flex-col gap-1 overflow-y-scroll">
           <textarea
             ref={inputRef}
             style={{ height: "0px" }}
-            className="flex-grow resize-none overflow-hidden  border-none bg-white p-4 pl-0 text-lg outline-none ring-transparent transition-colors duration-300 dark:bg-black"
+            className="text-md flex-grow resize-none  overflow-hidden border-none bg-white p-1 pl-0 outline-none ring-transparent transition-colors duration-300 dark:bg-black"
             placeholder="What's Happening?"
             value={inputValue}
             onChange={handleChange}
           />
           {previewAttachments.length > 0 && (
-            <div className=" h-[200px] w-11/12 md:h-[300px]">
+            <div className="h-[180px] w-11/12 md:h-[200px]">
               <Attachments
                 onRemoveAttachment={onRemoveFile}
                 attachments={previewAttachments}
@@ -287,7 +342,7 @@ function Form() {
         />
       </div>
 
-      <div className="flex justify-between">
+      <div className="mt-2 flex justify-between">
         <div className="flex w-[70%] justify-stretch">
           <button type="button" onClick={() => imgInputRef.current?.click()}>
             <IconHoverEffect>
@@ -296,16 +351,28 @@ function Form() {
           </button>
         </div>
 
-        <CircularProgress
-          variant="determinate"
-          value={(inputValue.length / 265) * 100}
-          size={25}
-          className="my-auto"
-        />
+        <div className="flex gap-3">
+          <CircularProgress
+            variant="determinate"
+            value={(inputValue.length / 265) * 100}
+            size={20}
+            className="my-auto"
+          />
 
-        <Button type="submit" className="self-end">
-          New Post
-        </Button>
+          <Button type="submit" className="min-w-[6rem] self-end px-4" small>
+            {createPost.isLoading ? (
+              <CircularProgress
+                size={20}
+                style={{
+                  color: "white",
+                }}
+                className="my-auto"
+              />
+            ) : (
+              "Comment"
+            )}
+          </Button>
+        </div>
       </div>
     </form>
   );

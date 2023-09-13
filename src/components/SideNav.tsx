@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { BiBell, BiHomeCircle, BiSearchAlt2 } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
-import { MdOutlineMailOutline } from "react-icons/md";
+import { MdAddTask, MdOutlineMailOutline } from "react-icons/md";
 import { VscSignIn, VscSignOut } from "react-icons/vsc";
 import { Button } from "./Button";
 import { IconHoverEffect } from "./IconHoverEffect";
@@ -13,25 +13,21 @@ import DarkSwitch from "./DarkSwitch";
 
 // type Props = {}
 
-
-
-
 function SideNav() {
   const session = useSession();
-  const router = useRouter()
+  const router = useRouter();
   const user = session.data?.user;
 
-  
   return (
-    <nav className="sticky top-0 h-screen w-[260px] max-w-[320px] border-l-2  px-2 py-4 ">
+    <nav className="fixed top-0 box-border h-screen xl:w-[275px]  w-[88px] grow-0 px-2 py-4 text-black transition-colors  duration-0 dark:text-white ">
       {/* <div className="absolute h-screen w-[1px] bg-green-400 z-10 left-[17px]"></div> */}
 
-      <ul className="flex flex-col items-start gap-3 whitespace-nowrap ">
+      <ul className="flex flex-col items-start gap-3 whitespace-nowrap w-full ">
         <li>
           <Link href="/">
             <IconHoverEffect>
               <span className="flex items-center gap-4">
-                <span className="hidden text-lg font-bold md:inline">
+                <span className="hidden text-lg font-bold xl:inline">
                   SocialSphere
                 </span>
               </span>
@@ -43,7 +39,7 @@ function SideNav() {
             <IconHoverEffect>
               <span className="flex items-center gap-4">
                 <BiHomeCircle className="h-8 w-8" />
-                <span className="hidden text-lg font-medium md:inline">
+                <span className="hidden text-lg font-medium xl:inline">
                   Home
                 </span>
               </span>
@@ -57,7 +53,7 @@ function SideNav() {
               <IconHoverEffect>
                 <span className="flex items-center gap-4">
                   <BiSearchAlt2 className="h-8 w-8" />
-                  <span className="hidden text-lg font-medium md:inline">
+                  <span className="hidden text-lg font-medium xl:inline">
                     Explore
                   </span>
                 </span>
@@ -71,7 +67,7 @@ function SideNav() {
               <IconHoverEffect>
                 <span className="flex items-center gap-4">
                   <MdOutlineMailOutline className="h-8 w-8" />
-                  <span className="hidden text-lg font-medium md:inline">
+                  <span className="hidden text-lg font-medium xl:inline">
                     Messages
                   </span>
                 </span>
@@ -85,7 +81,7 @@ function SideNav() {
               <IconHoverEffect>
                 <span className="flex items-center gap-4">
                   <BiBell className="h-8 w-8" />
-                  <span className="hidden text-lg font-medium md:inline">
+                  <span className="hidden text-lg font-medium xl:inline">
                     Notifications
                   </span>
                 </span>
@@ -100,7 +96,7 @@ function SideNav() {
               <IconHoverEffect>
                 <span className="flex items-center gap-4">
                   <CgProfile className="h-8 w-8" />
-                  <span className="hidden text-lg font-medium md:inline">
+                  <span className="hidden text-lg font-medium xl:inline">
                     Profile
                   </span>
                 </span>
@@ -112,9 +108,9 @@ function SideNav() {
         {user ? (
           <button onClick={() => void signOut()}>
             <IconHoverEffect>
-              <span className="flex items-center gap-4">
-                <VscSignOut className="h-8 w-8 " stroke-width="0.25" />
-                <span className="hidden text-lg font-medium md:inline">
+              <span className="flex items-center gap-4 text-black transition-colors duration-75 dark:text-white">
+                <VscSignOut className="h-8 w-8 " strokeWidth="0.25" />
+                <span className="hidden text-lg font-medium xl:inline">
                   Log Out
                 </span>
               </span>
@@ -123,9 +119,9 @@ function SideNav() {
         ) : (
           <Link href={`/enter`}>
             <IconHoverEffect>
-              <span className="flex items-center gap-4">
-                <VscSignIn className="h-8 w-8 " stroke-width="0.25" />
-                <span className="hidden text-lg font-medium md:inline">
+              <span className="flex items-center gap-4 text-black transition-colors duration-0 dark:text-white">
+                <VscSignIn className="h-8 w-8 " strokeWidth="0.25" />
+                <span className="hidden text-lg font-medium xl:inline">
                   Log In
                 </span>
               </span>
@@ -133,16 +129,24 @@ function SideNav() {
           </Link>
         )}
         {user && (
-          <li className="mx-auto w-11/12 my-2">
-            <Button type="submit" className="w-full py-3 text-xl font-bold ">
+          <li className=" ">
+            <Button
+              type="submit"
+              className="hidden w-full py-3 text-xl font-bold xl:inline "
+            >
               New Post
+            </Button>
+            <Button
+              type="submit"
+              className="px-2 py-2 text-xl font-bold xl:hidden "
+            >
+              <MdAddTask />
             </Button>
           </li>
         )}
-          <li className="mx-auto w-11/12 my-2">
-            <DarkSwitch />
-          </li>
-        
+        <li className="mt-4">
+          <DarkSwitch small />
+        </li>
       </ul>
     </nav>
   );

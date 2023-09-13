@@ -41,45 +41,16 @@ const Input: React.FC<InputProps> = ({
         htmlFor={id}
         className="
           block 
-          text-sm 
-          font-medium 
+          text-lg
+          font-bold 
           leading-6 
           text-gray-900
-          
+          mb-2
         "
       >
         {label}
       </label>
-      <div
-        className={clsx(
-          ` form-input  
-          mt-1     
-          flex  
-            w-full 
-            justify-stretch 
-            rounded-md 
-            border-0 
-            px-3
-            py-1 
-            text-gray-900 
-            shadow-sm 
-            ring-1 
-            ring-inset 
-            ring-gray-300 
-            placeholder:text-gray-400 
-            group-hover/form:ring-rose-500z
-            group-focus/form:ring-blue-500
-            group-active/form:ring-rose-500
-            peer-focus/form:ring-blue-500
-
-
-            
-            sm:text-sm 
-            sm:leading-6 `,
-          errors[id] && "focus:ring-rose-500",
-          disabled && "cursor-default opacity-50"
-        )}
-      >
+      <div className="relative ">
         <input
           id={id}
           type={
@@ -92,49 +63,75 @@ const Input: React.FC<InputProps> = ({
           className={clsx(
             `
             form-input
-            group/form
-            peer
             block 
             w-full 
-            rounded-md 
-            border-none 
-            py-1.5
+            rounded-lg 
+            border-0 
+            border-gray-300
+            bg-white 
+            py-2
+            text-lg
+            font-medium
             text-gray-900 
-            outline-none 
-            placeholder:text-gray-400 
-            group-focus/form:ring-blue-500
-
-            sm:text-sm 
+            shadow-md ring-1
+            ring-inset 
+            ring-gray-300 
+            transition-all 
+            duration-500 
+            placeholder:text-gray-300 
+            dark:placeholder:text-gray-400 
+            focus:ring-2 
+            focus:ring-inset
+            focus:ring-sky-600
+            dark:bg-gray-200 
             sm:leading-6`,
-            // errors[id] && "focus:ring-rose-500",
-            disabled && "cursor-default opacity-50"
+            errors[id] && "focus:ring-rose-500",
+            disabled && "cursor-default opacity-50",
+            type === "password" && "pr-10",
+            id === "username" && "pr-10"
           )}
         />
         {type === "password" && (
           <button
             type="button"
-            className="background-none my-auto h-fit text-sm text-gray-500 focus:outline-none"
+            className="background-none absolute inset-y-0 right-0 my-auto flex h-fit items-center pr-3  leading-5 text-gray-500 outline-none transition-all duration-500 focus:outline-none"
             onClick={togglePasswordVisibility}
           >
-            {passwordShown ? <BiHide size={24} /> : <BiShow size={24} />}
+            {passwordShown ? (
+              <BiHide
+                fill="black"
+                className="transition-all duration-500"
+                size={24}
+              />
+            ) : (
+              <BiShow
+                fill="black"
+                className="transition-all duration-500"
+                size={24}
+              />
+            )}
           </button>
         )}
-        {available === true ? (
-          <CiCircleCheck
-            className="stroke-custom my-auto fill-green-700  transition duration-200 "
-            size={28}
-          />
-        ) : available === "Loading" ? (
-          <CircularProgress
-            size={20}
-            className="my-auto transition duration-200 "
-          />
-        ) : available === false ? (
-          <CiCircleRemove
-            className="stroke-custom my-auto fill-red-700 transition duration-200"
-            size={28}
-          />
-        ) : null}
+
+        <div className="absolute inset-y-0 right-3 my-auto flex flex-col justify-center">
+          {available === true ? (
+            <CiCircleCheck
+              className="stroke-custom  fill-green-700 transition duration-200 "
+              size={24}
+              stroke-width="0.125"
+            />
+          ) : available === "Loading" ? (
+            <CircularProgress
+              size={20}
+              className="my-auto transition duration-200 "
+            />
+          ) : available === false ? (
+            <CiCircleRemove
+              className="stroke-custom my-auto fill-red-700 transition duration-200"
+              size={28}
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { inferAsyncReturnType } from "@trpc/server";
 import { z } from "zod";
+import { Post } from "~/components/post/Posts";
 import {
   createTRPCContext,
   createTRPCRouter,
@@ -12,8 +13,6 @@ import { FileInput } from "~/utils/types";
 // import IncomingForm from "formidable/Formidable";
 // import tIncomingForm from 'formidable/Formidable';
 // import IncomingForm from "formidable/Formidable";
-
-
 
 export const postRouter = createTRPCRouter({
   infiniteProfileFeed: publicProcedure
@@ -116,7 +115,6 @@ export const postRouter = createTRPCRouter({
           data: {
             ...(content ? { content } : {}),
             userId: ctx.session.user.id,
-            
 
             files: {
               create: files?.map((file) => {
@@ -133,45 +131,320 @@ export const postRouter = createTRPCRouter({
               }),
             },
           },
-          include: {
-            files: true,
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            _count: { select: { likes: true, comments: true, reposts: true } },
+            user: {
+              select: { name: true, id: true, image: true, username: true },
+            },
+            files: {
+              select: {
+                url: true,
+                id: true,
+                size: true,
+                height: true,
+                width: true,
+                name: true,
+              },
+            },
+            //update this
+            likes:
+              ctx.session.user.id == null
+                ? false
+                : {
+                    where: {
+                      userId: ctx.session.user.id,
+                    },
+                  },
+            commentTO: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                _count: {
+                  select: { likes: true, comments: true, reposts: true },
+                },
+                user: {
+                  select: { name: true, id: true, image: true, username: true },
+                },
+                files: {
+                  select: {
+                    url: true,
+                    id: true,
+                    size: true,
+                    height: true,
+                    width: true,
+                    name: true,
+                  },
+                },
+                likes:
+                  ctx.session.user.id == null
+                    ? false
+                    : {
+                        where: {
+                          userId: ctx.session.user.id,
+                        },
+                      },
+              },
+            },
+            commentToId: true,
+            comments: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                _count: {
+                  select: { likes: true, comments: true, reposts: true },
+                },
+                user: {
+                  select: { name: true, id: true, image: true, username: true },
+                },
+                files: {
+                  select: {
+                    url: true,
+                    id: true,
+                    size: true,
+                    height: true,
+                    width: true,
+                    name: true,
+                  },
+                },
+
+                //update this
+              },
+            },
           },
         });
 
-
-        if(isRepost){
+        if (isRepost) {
           post = await ctx.prisma.post.update({
             where: { id: post.id },
             data: {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              repostTo:{connect:{id: OriginalPostId!}}
+              repostTo: { connect: { id: OriginalPostId! } },
             },
-            include:{
-              files: true
-            }
+
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              _count: {
+                select: { likes: true, comments: true, reposts: true },
+              },
+              user: {
+                select: { name: true, id: true, image: true, username: true },
+              },
+              files: {
+                select: {
+                  url: true,
+                  id: true,
+                  size: true,
+                  height: true,
+                  width: true,
+                  name: true,
+                },
+              },
+              //update this
+              likes:
+                ctx.session.user.id == null
+                  ? false
+                  : {
+                      where: {
+                        userId: ctx.session.user.id,
+                      },
+                    },
+              commentTO: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    ctx.session.user.id == null
+                      ? false
+                      : {
+                          where: {
+                            userId: ctx.session.user.id,
+                          },
+                        },
+                },
+              },
+              commentToId: true,
+              comments: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+
+                  //update this
+                },
+              },
+            },
           });
         }
-        if(isComment){
+        if (isComment) {
           post = await ctx.prisma.post.update({
             where: { id: post.id },
             data: {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               commentTO: { connect: { id: OriginalPostId! } },
             },
-            include: {
-              files: true,
+            select: {
+              id: true,
+              content: true,
+              createdAt: true,
+              _count: {
+                select: { likes: true, comments: true, reposts: true },
+              },
+              user: {
+                select: { name: true, id: true, image: true, username: true },
+              },
+              files: {
+                select: {
+                  url: true,
+                  id: true,
+                  size: true,
+                  height: true,
+                  width: true,
+                  name: true,
+                },
+              },
+              //update this
+              likes:
+                ctx.session.user.id == null
+                  ? false
+                  : {
+                      where: {
+                        userId: ctx.session.user.id,
+                      },
+                    },
+              commentTO: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    ctx.session.user.id == null
+                      ? false
+                      : {
+                          where: {
+                            userId: ctx.session.user.id,
+                          },
+                        },
+                },
+              },
+              commentToId: true,
+              comments: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+
+                  //update this
+                },
+              },
             },
           });
         }
-        
-        return { post };
+
+        return {
+          post: {
+            ...post,
+            content: post.content as string,
+          },
+        };
       }
     ),
 
   toggleLike: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input: { id }, ctx }) => {
-      const data = { postId: id, userId: ctx.session.user.id  };
+      const data = { postId: id, userId: ctx.session.user.id };
       const existingLike = await ctx.prisma.like.findUnique({
         where: { userId_postId: data },
       });
@@ -204,7 +477,7 @@ export const postRouter = createTRPCRouter({
           createdAt: true,
           _count: { select: { likes: true, comments: true, reposts: true } },
           user: {
-            select: { name: true, id: true, image: true },
+            select: { name: true, id: true, image: true, username: true },
           },
           files: true,
           commentToId: true,
@@ -266,9 +539,9 @@ async function getInfinitePosts({
       id: true,
       content: true,
       createdAt: true,
-      _count: { select: { likes: true ,comments: true,reposts: true} },
+      _count: { select: { likes: true, comments: true, reposts: true } },
       user: {
-        select: { name: true, id: true, image: true },
+        select: { name: true, id: true, image: true, username: true },
       },
       files: {
         select: {
@@ -289,6 +562,67 @@ async function getInfinitePosts({
                 userId: currentUserId,
               },
             },
+      commentTO: {
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          _count: { select: { likes: true, comments: true, reposts: true } },
+          user: {
+            select: { name: true, id: true, image: true, username: true },
+          },
+          files: {
+            select: {
+              url: true,
+              id: true,
+              size: true,
+              height: true,
+              width: true,
+              name: true,
+            },
+          },
+          likes:
+            currentUserId == null
+              ? false
+              : {
+                  where: {
+                    userId: currentUserId,
+                  },
+                },
+        },
+      },
+      commentToId: true,
+      comments: {
+        select: {
+          id: true,
+          content: true,
+          createdAt: true,
+          _count: { select: { likes: true, comments: true, reposts: true } },
+          user: {
+            select: { name: true, id: true, image: true, username: true },
+          },
+          files: {
+            select: {
+              url: true,
+              id: true,
+              size: true,
+              height: true,
+              width: true,
+              name: true,
+            },
+          },
+
+          //update this
+          likes:
+            currentUserId == null
+              ? false
+              : {
+                  where: {
+                    userId: currentUserId,
+                  },
+                },
+        },
+      },
     },
   });
   let nextCursor: typeof cursor | undefined;
@@ -298,11 +632,12 @@ async function getInfinitePosts({
       nextCursor = { id: nextItem.id, createdAt: nextItem.createdAt };
     }
   }
+
   return {
     posts: data.map((post) => {
       return {
         id: post.id,
-        content: post.content,
+        content: post.content as string,
         files: post.files,
         createdAt: post.createdAt,
         user: post.user,
@@ -310,9 +645,32 @@ async function getInfinitePosts({
         commentCount: post._count.comments,
         repostCount: post._count.reposts,
         likedByMe: post.likes?.length > 0,
+        comments: post.comments.map((comment) => {
+          return {
+            id: comment.id,
+            content: comment.content as string,
+            files: comment.files,
+            createdAt: comment.createdAt,
+            user: comment.user,
+            likeCount: comment._count.likes,
+            commentCount: comment._count.comments,
+            repostCount: comment._count.reposts,
+            likedByMe: comment.likes?.length > 0,
+          };
+        }),
+        commentTO: {
+          id: post?.commentTO?.id,
+          content: post?.commentTO?.content as string,
+          files: post?.commentTO?.files,
+          createdAt: post?.commentTO?.createdAt,
+          user: post?.commentTO?.user,
+          likeCount: post?.commentTO?._count.likes,
+          commentCount: post?.commentTO?._count.comments,
+          repostCount: post?.commentTO?._count.reposts,
+          likedByMe: (post?.commentTO?.likes.length as number) > 0,
+        },
       };
     }),
     nextCursor,
   };
 }
-

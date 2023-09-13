@@ -23,13 +23,34 @@ export type Post = {
     image: string | null;
     id: string;
     name: string | null;
+    username: string | null;
   };
   likeCount: number;
   commentCount: number;
   repostCount: number;
   likedByMe: boolean;
   files: File[];
+  commentTO?: OtherPost | null;
+  comments: OtherPost[];
 };
+
+type OtherPost ={
+    id: string,
+    content?: string;
+    createdAt: Date;
+    user: {
+      image: string | null;
+      id: string;
+      name: string | null;
+      username: string | null;
+    };
+    likeCount: number;
+    commentCount: number;
+    repostCount: number;
+    likedByMe: boolean;
+    files: File[];
+ 
+}
 
 type PostListProps = {
   isLoading: boolean;
@@ -61,9 +82,10 @@ export const Posts = ({
         hasMore={hasMore}
         loader={<LoadingSpinner />}
         dataLength={posts.length}
+        className="max-w-full"
       >
         {posts.map((post, index) => (
-          <PostCard key={post.id} {...post} />
+          <PostCard  key={post.id} {...post} />
         ))}
       </InfiniteScroll>
     </ul>

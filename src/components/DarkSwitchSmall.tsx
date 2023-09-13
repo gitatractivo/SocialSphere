@@ -4,22 +4,18 @@ import { styled } from "@mui/material/styles";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import DarkSwitchSmall from './DarkSwitchSmall'
-
-export let isDark = true;
-
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
-  width: 100,
-  height: 50,
-  padding: 8,
+  width: 42,
+  height: 26,
+  padding: 1,
   "& .MuiSwitch-switchBase": {
     margin: 1,
     padding: 0,
-    transform: "translateX(7px)",
+    transform: "translateX(0px)",
     "&.Mui-checked": {
       color: "#fff",
-      transform: "translateX(43px)",
+      transform: "translateX(18px)",
       "& .MuiSwitch-thumb:before": {
         backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
           "#fff"
@@ -33,8 +29,8 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
   "& .MuiSwitch-thumb": {
     backgroundColor: theme.palette.mode === "dark" ? "#003892" : "#001e3c",
-    width: 50,
-    height: 48,
+    width: 26,
+    height: 24,
     "&:before": {
       content: "''",
       position: "absolute",
@@ -56,41 +52,22 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const DarkSwitch = ({small=false}:{small?:boolean }) => {
-  const [checked, setChecked] = useState<boolean>(true);
-  const { systemTheme, theme, setTheme } = useTheme();
-  const isSmallScreen = useMediaQuery("(max-width: 1279px)");
-  
-  isDark= checked;
-
-  useEffect(() => {
-    if (systemTheme && theme === "system") {
-      console.log(systemTheme);
-      setChecked(systemTheme === "dark" ?? true);
-      return;
-    }
-    setChecked(theme === "dark" ?? true);
-  }, [theme, systemTheme]);
-  // toast.error("hit")
-  const handleChange = () => {
-    // toast.success("hit");
-    setTheme(theme === "dark" ? "light" : "dark");
-   
-  };
-  if (isSmallScreen && small) return <DarkSwitchSmall handleChange={handleChange} checked={checked} />;
-
-
-
+const DarkSwitch = ({
+  checked,
+  handleChange,
+}: {
+  checked: boolean;
+  handleChange: () => void;
+}) => {
   return (
     <div onClick={handleChange}>
-      
       <MaterialUISwitch
-        sx={{ 
+        sx={{
+          m: 0,
           
-          m: 1
-      
-      }}
+        }}
         checked={checked}
+        className=" -rotate-90 "
       />
     </div>
   );

@@ -7,7 +7,9 @@ import Head from "next/head";
 import SideNav from "~/components/SideNav";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "next-themes";
-
+import clsx from "clsx";
+import { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -16,14 +18,28 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const router = useRouter();
   const isEnterRoute = router.pathname === "/enter";
 
-
   return (
     <SessionProvider session={session}>
       <ThemeProvider attribute="class">
-        
-        <div className="container mx-auto flex w-fit items-start justify-center gap-0 sm:pr-4">
-          {isEnterRoute ? null : <SideNav />}
-          <div className=" min-h-screen w-fit max-w-[1000px]  flex-grow border-x">
+        <Toaster position="top-center" reverseOrder={false} />
+        <div
+          className={clsx(
+            "mx-auto flex w-screen items-start  justify-center gap-0 lg:justify-center",
+            isEnterRoute ? "" : " mx-auto "
+          )}
+        >
+          {!isEnterRoute && (
+            <div className="box-border hidden w-[88px] sm:flex xl:w-[275px]">
+              {isEnterRoute ? null : <SideNav />}
+            </div>
+          )}
+          <div
+            className={clsx(
+              "min-h-screen grow  ",
+              !isEnterRoute &&
+                " box-border w-full  sm:w-[calc(100vw-88px)] sm:max-w-[600px] lg:max-w-[1000px] xl:w-[calc(100vw-275px)]  "
+            )}
+          >
             <Component {...pageProps} />
           </div>
         </div>

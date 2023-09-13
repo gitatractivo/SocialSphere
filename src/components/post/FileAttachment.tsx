@@ -5,12 +5,15 @@ import { File } from "./Posts";
 const Attachments: React.FC<{
   attachments: File[];
 }> = ({ attachments,  }) => {
-  const className = classNames("grid b-2 b-slate-900 gap-2 w-full h-full", {
-    "grid-rows-1": attachments.length <= 2,
-    "grid-rows-2": attachments.length > 2,
-    "grid-cols-1": attachments.length === 1,
-    "grid-cols-2": attachments.length > 1,
-  });
+  const className = classNames(
+    "grid  b-2 b-slate-900 border-[0.25px] border-gray-700 overflow-hidden gap-[4px] rounded-xl  w-full h-full",
+    {
+      "grid-rows-1": attachments.length <= 2,
+      "grid-rows-2": attachments.length > 2,
+      "grid-cols-1": attachments.length === 1,
+      "grid-cols-2": attachments.length > 1,
+    }
+  );
 
   return (
     <div className={className as string | undefined}>
@@ -29,7 +32,7 @@ export const Attachment: React.FC<{
   attachment: File;
   fill: boolean;
 }> = ({ attachment, fill }) => {
-  const className = classNames("overflow-hidden rounded-lg shadow-md border-2 relative ", {
+  const className = classNames("  border-[0.25px] border-gray-900 ", {
     "row-span-2": fill,
   });
 

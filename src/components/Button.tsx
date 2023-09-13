@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, DetailedHTMLProps } from "react";
+import cn from "~/utils/cn";
 
 type ButtonProps = {
   small?: boolean;
@@ -24,7 +25,7 @@ export function Button({
   const fullClass = fullWidth ? "w-full":"";
   return (
     <button
-      className={`rounded-full text-white transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${sizeClasses} ${colorClasses} ${className} ${fullClass}`}
+      className={cn("rounded-full text-white transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50" ,sizeClasses ,colorClasses ,className ,fullClass)}
       {...props}
     ></button>
   );
