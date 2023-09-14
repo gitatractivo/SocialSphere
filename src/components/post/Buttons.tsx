@@ -1,4 +1,5 @@
 import { VscComment, VscHeart, VscHeartFilled } from "react-icons/vsc";
+import {AiOutlineRetweet} from "react-icons/ai"
 import { IconHoverEffect } from "../IconHoverEffect";
 import { useSession } from "next-auth/react";
 
@@ -89,6 +90,44 @@ export const CommentButton = ({
         />
       </IconHoverEffect>
       <span>{commentCount}</span>
+    </button>
+  );
+};
+type RePostButtonProps = {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  isLoading: boolean;
+  // commentByMe: boolean;
+  rePostCount: number;
+};
+
+export const RePostButton = ({
+  isLoading,
+  onClick,
+  // commentByMe,
+  rePostCount,
+}: RePostButtonProps) => {
+  const session = useSession();
+  // const HeartIcon = commentdByMe ? VscHeartFilled : VscHeart;
+
+  if (session.status !== "authenticated") {
+    return (
+      <div className="mb-1 mt-1 flex items-center gap-3 self-start text-gray-500">
+        <VscComment />
+        <span>{rePostCount}</span>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      disabled={isLoading}
+      onClick={onClick}
+      className={`group ml-2  flex items-center gap-1 self-start transition-colors duration-200 `}
+    >
+      <IconHoverEffect>
+        <AiOutlineRetweet className={`transition-colors duration-200 `} />
+      </IconHoverEffect>
+      <span>{rePostCount}</span>
     </button>
   );
 };

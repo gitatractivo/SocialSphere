@@ -25,23 +25,7 @@ function updateTextAreaSize(textArea?: HTMLTextAreaElement) {
   textArea.style.height = "0";
   textArea.style.height = `${textArea.scrollHeight}px`;
 }
-// type AttachmentType={
-//   id: string,
-//           postId: string,
-//           fileId: string,
-//           createdAt: Date,
-//           file: {
-//             id: string,
-//             type: "IMAGE",
-//             url:string,
-//             mime: string,
-//             name: string,
-//             extension: string,
-//             size: number,
-//             height: number,
-//             width: number,
-//             createdAt: Date,
-// }}
+
 
 export type FileAndAttachment = { file: File; url: string };
 
@@ -122,6 +106,59 @@ function Form() {
             }),
           },
           comments: newPost.comments.map((comment) => {
+            return {
+              ...comment,
+              likeCount: comment._count.likes,
+              commentCount: comment._count.comments,
+              repostCount: comment._count.reposts,
+              likedByMe: false,
+              content: comment.content as string,
+              user: {
+                image: comment.user.image,
+                id: comment.user.id,
+                name: comment.user.name,
+                username: comment.user.username,
+              },
+              files: comment.files.map((file) => {
+                return {
+                  id: file.id,
+                  width: file.width,
+                  url: file.url,
+                  height: file.height,
+                  size: file.size,
+                  name: file.name,
+                };
+              }),
+            };
+          }),
+          repostTo: {
+            ...newPost.repostTo,
+            likeCount: newPost.repostTo?._count.likes ?? 0,
+            commentCount: newPost.repostTo?._count.comments ?? 0,
+            repostCount: newPost.repostTo?._count.reposts ?? 0,
+            likedByMe: false,
+            content: newPost.repostTo?.content as string,
+            id: newPost.repostTo?.id as string,
+            createdAt: newPost.repostTo?.createdAt as Date,
+
+            user: {
+              image: newPost.repostTo?.user!.image as string | null,
+              id: newPost.repostTo?.user.id as string,
+              name: newPost.repostTo?.user.name as string | null,
+              username: newPost.repostTo?.user.username as string | null,
+            },
+            files: newPost.repostTo?.files.map((file) => {
+              return {
+                id: file.id,
+                width: file.width,
+                url: file.url,
+                height: file.height,
+                size: file.size,
+                name: file.name,
+              };
+            }),
+          },
+          reposts: newPost.reposts.map((comment) => {
             return {
               ...comment,
               likeCount: comment._count.likes,

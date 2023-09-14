@@ -138,13 +138,13 @@ function SideNav() {
             </Button>
             <Button
               type="submit"
-              className="px-2 py-2 text-xl font-bold xl:hidden "
+              className="px-2 mx-2 py-2 text-xl font-bold xl:hidden "
             >
               <MdAddTask />
             </Button>
           </li>
         )}
-        <li className="mt-4">
+        <li className="mt-4 mx-1 ">
           <DarkSwitch small />
         </li>
       </ul>

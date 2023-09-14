@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { inferAsyncReturnType } from "@trpc/server";
+import { TRPCError, inferAsyncReturnType } from "@trpc/server";
 import { z } from "zod";
 import { Post } from "~/components/post/Posts";
 import {
@@ -11,6 +11,7 @@ import {
 import cloudinary from "~/server/cloudinary";
 import { FileInput } from "~/utils/types";
 // import IncomingForm from "formidable/Formidable";
+import * as trpc from '@trpc/server';
 // import tIncomingForm from 'formidable/Formidable';
 // import IncomingForm from "formidable/Formidable";
 
@@ -131,91 +132,7 @@ export const postRouter = createTRPCRouter({
               }),
             },
           },
-          select: {
-            id: true,
-            content: true,
-            createdAt: true,
-            _count: { select: { likes: true, comments: true, reposts: true } },
-            user: {
-              select: { name: true, id: true, image: true, username: true },
-            },
-            files: {
-              select: {
-                url: true,
-                id: true,
-                size: true,
-                height: true,
-                width: true,
-                name: true,
-              },
-            },
-            //update this
-            likes:
-              ctx.session.user.id == null
-                ? false
-                : {
-                    where: {
-                      userId: ctx.session.user.id,
-                    },
-                  },
-            commentTO: {
-              select: {
-                id: true,
-                content: true,
-                createdAt: true,
-                _count: {
-                  select: { likes: true, comments: true, reposts: true },
-                },
-                user: {
-                  select: { name: true, id: true, image: true, username: true },
-                },
-                files: {
-                  select: {
-                    url: true,
-                    id: true,
-                    size: true,
-                    height: true,
-                    width: true,
-                    name: true,
-                  },
-                },
-                likes:
-                  ctx.session.user.id == null
-                    ? false
-                    : {
-                        where: {
-                          userId: ctx.session.user.id,
-                        },
-                      },
-              },
-            },
-            commentToId: true,
-            comments: {
-              select: {
-                id: true,
-                content: true,
-                createdAt: true,
-                _count: {
-                  select: { likes: true, comments: true, reposts: true },
-                },
-                user: {
-                  select: { name: true, id: true, image: true, username: true },
-                },
-                files: {
-                  select: {
-                    url: true,
-                    id: true,
-                    size: true,
-                    height: true,
-                    width: true,
-                    name: true,
-                  },
-                },
-
-                //update this
-              },
-            },
-          },
+          select: selectObject(ctx.session.user.id),
         });
 
         if (isRepost) {
@@ -226,103 +143,7 @@ export const postRouter = createTRPCRouter({
               repostTo: { connect: { id: OriginalPostId! } },
             },
 
-            select: {
-              id: true,
-              content: true,
-              createdAt: true,
-              _count: {
-                select: { likes: true, comments: true, reposts: true },
-              },
-              user: {
-                select: { name: true, id: true, image: true, username: true },
-              },
-              files: {
-                select: {
-                  url: true,
-                  id: true,
-                  size: true,
-                  height: true,
-                  width: true,
-                  name: true,
-                },
-              },
-              //update this
-              likes:
-                ctx.session.user.id == null
-                  ? false
-                  : {
-                      where: {
-                        userId: ctx.session.user.id,
-                      },
-                    },
-              commentTO: {
-                select: {
-                  id: true,
-                  content: true,
-                  createdAt: true,
-                  _count: {
-                    select: { likes: true, comments: true, reposts: true },
-                  },
-                  user: {
-                    select: {
-                      name: true,
-                      id: true,
-                      image: true,
-                      username: true,
-                    },
-                  },
-                  files: {
-                    select: {
-                      url: true,
-                      id: true,
-                      size: true,
-                      height: true,
-                      width: true,
-                      name: true,
-                    },
-                  },
-                  likes:
-                    ctx.session.user.id == null
-                      ? false
-                      : {
-                          where: {
-                            userId: ctx.session.user.id,
-                          },
-                        },
-                },
-              },
-              commentToId: true,
-              comments: {
-                select: {
-                  id: true,
-                  content: true,
-                  createdAt: true,
-                  _count: {
-                    select: { likes: true, comments: true, reposts: true },
-                  },
-                  user: {
-                    select: {
-                      name: true,
-                      id: true,
-                      image: true,
-                      username: true,
-                    },
-                  },
-                  files: {
-                    select: {
-                      url: true,
-                      id: true,
-                      size: true,
-                      height: true,
-                      width: true,
-                      name: true,
-                    },
-                  },
-
-                  //update this
-                },
-              },
-            },
+            select: selectObject(ctx.session.user.id)
           });
         }
         if (isComment) {
@@ -332,103 +153,7 @@ export const postRouter = createTRPCRouter({
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               commentTO: { connect: { id: OriginalPostId! } },
             },
-            select: {
-              id: true,
-              content: true,
-              createdAt: true,
-              _count: {
-                select: { likes: true, comments: true, reposts: true },
-              },
-              user: {
-                select: { name: true, id: true, image: true, username: true },
-              },
-              files: {
-                select: {
-                  url: true,
-                  id: true,
-                  size: true,
-                  height: true,
-                  width: true,
-                  name: true,
-                },
-              },
-              //update this
-              likes:
-                ctx.session.user.id == null
-                  ? false
-                  : {
-                      where: {
-                        userId: ctx.session.user.id,
-                      },
-                    },
-              commentTO: {
-                select: {
-                  id: true,
-                  content: true,
-                  createdAt: true,
-                  _count: {
-                    select: { likes: true, comments: true, reposts: true },
-                  },
-                  user: {
-                    select: {
-                      name: true,
-                      id: true,
-                      image: true,
-                      username: true,
-                    },
-                  },
-                  files: {
-                    select: {
-                      url: true,
-                      id: true,
-                      size: true,
-                      height: true,
-                      width: true,
-                      name: true,
-                    },
-                  },
-                  likes:
-                    ctx.session.user.id == null
-                      ? false
-                      : {
-                          where: {
-                            userId: ctx.session.user.id,
-                          },
-                        },
-                },
-              },
-              commentToId: true,
-              comments: {
-                select: {
-                  id: true,
-                  content: true,
-                  createdAt: true,
-                  _count: {
-                    select: { likes: true, comments: true, reposts: true },
-                  },
-                  user: {
-                    select: {
-                      name: true,
-                      id: true,
-                      image: true,
-                      username: true,
-                    },
-                  },
-                  files: {
-                    select: {
-                      url: true,
-                      id: true,
-                      size: true,
-                      height: true,
-                      width: true,
-                      name: true,
-                    },
-                  },
-
-                  //update this
-                },
-              },
-            },
+            select: selectObject(ctx.session.user.id),
           });
         }
 
@@ -530,100 +255,19 @@ async function getInfinitePosts({
 }) {
   const currentUserId = ctx.session?.user.id;
 
+  if(!currentUserId){
+    throw new trpc.TRPCError({
+      code: "CONFLICT",
+      message: "Error",
+    });
+  }
+
   const data = await ctx.prisma.post.findMany({
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     where: whereClause,
-    select: {
-      id: true,
-      content: true,
-      createdAt: true,
-      _count: { select: { likes: true, comments: true, reposts: true } },
-      user: {
-        select: { name: true, id: true, image: true, username: true },
-      },
-      files: {
-        select: {
-          url: true,
-          id: true,
-          size: true,
-          height: true,
-          width: true,
-          name: true,
-        },
-      },
-      //update this
-      likes:
-        currentUserId == null
-          ? false
-          : {
-              where: {
-                userId: currentUserId,
-              },
-            },
-      commentTO: {
-        select: {
-          id: true,
-          content: true,
-          createdAt: true,
-          _count: { select: { likes: true, comments: true, reposts: true } },
-          user: {
-            select: { name: true, id: true, image: true, username: true },
-          },
-          files: {
-            select: {
-              url: true,
-              id: true,
-              size: true,
-              height: true,
-              width: true,
-              name: true,
-            },
-          },
-          likes:
-            currentUserId == null
-              ? false
-              : {
-                  where: {
-                    userId: currentUserId,
-                  },
-                },
-        },
-      },
-      commentToId: true,
-      comments: {
-        select: {
-          id: true,
-          content: true,
-          createdAt: true,
-          _count: { select: { likes: true, comments: true, reposts: true } },
-          user: {
-            select: { name: true, id: true, image: true, username: true },
-          },
-          files: {
-            select: {
-              url: true,
-              id: true,
-              size: true,
-              height: true,
-              width: true,
-              name: true,
-            },
-          },
-
-          //update this
-          likes:
-            currentUserId == null
-              ? false
-              : {
-                  where: {
-                    userId: currentUserId,
-                  },
-                },
-        },
-      },
-    },
+    select: selectObject(currentUserId),
   });
   let nextCursor: typeof cursor | undefined;
   if (data.length > limit) {
@@ -655,7 +299,7 @@ async function getInfinitePosts({
             likeCount: comment._count.likes,
             commentCount: comment._count.comments,
             repostCount: comment._count.reposts,
-            likedByMe: comment.likes?.length > 0,
+            likedByMe: (comment.likes.length) > 0,
           };
         }),
         commentTO: {
@@ -669,8 +313,217 @@ async function getInfinitePosts({
           repostCount: post?.commentTO?._count.reposts,
           likedByMe: (post?.commentTO?.likes.length as number) > 0,
         },
+        reposts: post.reposts.map((comment) => {
+          return {
+            id: comment.id,
+            content: comment.content as string,
+            files: comment.files,
+            createdAt: comment.createdAt,
+            user: comment.user,
+            likeCount: comment._count.likes,
+            commentCount: comment._count.comments,
+            repostCount: comment._count.reposts,
+            likedByMe: (comment.likes.length) > 0,
+          };
+        }),
+        repostTo: {
+          id: post?.repostTo?.id,
+          content: post?.repostTo?.content as string,
+          files: post?.repostTo?.files,
+          createdAt: post?.repostTo?.createdAt,
+          user: post?.repostTo?.user,
+          likeCount: post?.repostTo?._count.likes,
+          commentCount: post?.repostTo?._count.comments,
+          repostCount: post?.repostTo?._count.reposts,
+          likedByMe: (post?.repostTo?.likes.length as number) > 0,
+        },
       };
     }),
     nextCursor,
   };
+}
+
+
+
+const selectObject = (user:string)=>{
+  return{
+              id: true,
+              content: true,
+              createdAt: true,
+              _count: {
+                select: { likes: true, comments: true, reposts: true },
+              },
+              user: {
+                select: { name: true, id: true, image: true, username: true },
+              },
+              files: {
+                select: {
+                  url: true,
+                  id: true,
+                  size: true,
+                  height: true,
+                  width: true,
+                  name: true,
+                },
+              },
+              //update this
+              likes:
+                user == null
+                  ? false
+                  : {
+                      where: {
+                        userId: user,
+                      },
+                    },
+              commentTO: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    user == null
+                      ? false
+                      : {
+                          where: {
+                            userId: user,
+                          },
+                        },
+                },
+              },
+              commentToId: true,
+              comments: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    user == null
+                      ? false
+                      : {
+                          where: {
+                            userId: user,
+                          },
+                        },
+
+                  //update this
+                },
+              },
+              repostTo: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    user == null
+                      ? false
+                      : {
+                          where: {
+                            userId: user,
+                          },
+                        },
+                },
+              },
+              repostToId: true,
+              reposts: {
+                select: {
+                  id: true,
+                  content: true,
+                  createdAt: true,
+                  _count: {
+                    select: { likes: true, comments: true, reposts: true },
+                  },
+                  user: {
+                    select: {
+                      name: true,
+                      id: true,
+                      image: true,
+                      username: true,
+                    },
+                  },
+                  files: {
+                    select: {
+                      url: true,
+                      id: true,
+                      size: true,
+                      height: true,
+                      width: true,
+                      name: true,
+                    },
+                  },
+                  likes:
+                    user == null
+                      ? false
+                      : {
+                          where: {
+                            userId: user,
+                          },
+                        },
+
+                  //update this
+                },
+              },
+            }
 }

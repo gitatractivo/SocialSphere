@@ -17,3 +17,9 @@
         @apply dark:bg-black bg-white transition-colors duration-300
     }
 }
+
+/**.backk{
+    backdrop-filter: blur(12px);
+    background-color: rgba(0, 0, 0, 0.65);
+    -webkit-backdrop-filter: blur(12px);
+}**/

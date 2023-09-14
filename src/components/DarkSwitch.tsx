@@ -4,17 +4,16 @@ import { styled } from "@mui/material/styles";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import DarkSwitchSmall from './DarkSwitchSmall'
+import DarkSwitchSmall from "./DarkSwitchSmall";
 
 export let isDark = true;
-
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 100,
   height: 50,
   padding: 8,
   "& .MuiSwitch-switchBase": {
-    margin: 1,
+    margin: "0 !important",
     padding: 0,
     transform: "translateX(7px)",
     "&.Mui-checked": {
@@ -54,14 +53,17 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     backgroundColor: theme.palette.mode === "dark" ? "#8796A5" : "#aab4be",
     borderRadius: 35 / 2,
   },
+  "& .MuiSwitch-root": {
+    margin: "0 !important",
+  },
 }));
 
-const DarkSwitch = ({small=false}:{small?:boolean }) => {
+const DarkSwitch = ({ small = false }: { small?: boolean }) => {
   const [checked, setChecked] = useState<boolean>(true);
   const { systemTheme, theme, setTheme } = useTheme();
   const isSmallScreen = useMediaQuery("(max-width: 1279px)");
-  
-  isDark= checked;
+
+  isDark = checked;
 
   useEffect(() => {
     if (systemTheme && theme === "system") {
@@ -75,22 +77,16 @@ const DarkSwitch = ({small=false}:{small?:boolean }) => {
   const handleChange = () => {
     // toast.success("hit");
     setTheme(theme === "dark" ? "light" : "dark");
-   
   };
-  if (isSmallScreen && small) return <DarkSwitchSmall handleChange={handleChange} checked={checked} />;
-
-
+  if (isSmallScreen && small)
+    return <DarkSwitchSmall handleChange={handleChange} checked={checked} />;
 
   return (
     <div onClick={handleChange}>
-      
       <MaterialUISwitch
-        sx={{ 
-          
-          m: 1
-      
-      }}
+        
         checked={checked}
+        className="!m-0"
       />
     </div>
   );

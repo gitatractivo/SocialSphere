@@ -125,7 +125,7 @@ function Form({
                   
                 },
               ];
-              post.commentCount++;
+              post.repostCount++;
             }
           });
         });
@@ -324,7 +324,7 @@ function Form({
     createPost.mutate({
       content: inputValue,
       files,
-      isComment: true,
+      isRepost: true,
       OriginalPostId,
     });
   };
@@ -373,7 +373,7 @@ function Form({
             ref={inputRef}
             style={{ height: "0px" }}
             className="text-md flex-grow resize-none  overflow-hidden border-none bg-white p-1 pl-0 outline-none ring-transparent transition-colors duration-300 dark:bg-black"
-            placeholder="Add a comment"
+            placeholder="Add a comment!"
             value={inputValue}
             onChange={handleChange}
           />
@@ -420,10 +420,10 @@ function Form({
                 style={{
                   color: "white",
                 }}
-                className="my-auto"
+                className="mt-1"
               />
             ) : (
-              "Comment"
+              "Repost"
             )}
           </Button>
         </div>

@@ -1,5 +1,4 @@
 import InfiniteScroll from "react-infinite-scroll-component";
-
 import PostCard from ".";
 import { LoadingSpinner } from "../LoadingSpinner";
 
@@ -32,6 +31,8 @@ export type Post = {
   files: File[];
   commentTO?: OtherPost | null;
   comments: OtherPost[];
+  repostTo?: OtherPost | null;
+  reposts: OtherPost[];
 };
 
 type OtherPost ={
@@ -84,9 +85,10 @@ export const Posts = ({
         dataLength={posts.length}
         className="max-w-full"
       >
-        {posts.map((post, index) => (
-          <PostCard  key={post.id} {...post} />
-        ))}
+        {posts.map((post, index) => {
+          
+          return <PostCard key={post.id} {...post} />;
+        })}
       </InfiniteScroll>
     </ul>
   );
