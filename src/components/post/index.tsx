@@ -56,7 +56,7 @@ function Post(post: Post) {
     // Ensure that both refs exist before proceeding
     if (yourDivRef.current && scrollHeightRef.current) {
       // Get the scroll height of the other element
-      const scrollHeight = scrollHeightRef.current.clientHeight ;
+      const scrollHeight = scrollHeightRef.current.scrollHeight ;
 
       // Set the height of your div to match the scroll height
       yourDivRef.current.style.height = `${scrollHeight}px`;
@@ -416,7 +416,7 @@ function Post(post: Post) {
             )}
           </Link>
           {!!repostTo?.id && (
-            <div className="my-4 ml-8 flex max-w-[400px] flex-grow flex-col rounded-lg border border-gray-700 px-4 py-2 ">
+            <div className="my-4 ml-6 flex max-w-[420px] flex-grow flex-col rounded-lg border border-gray-700 px-4 py-2 ">
               <div className="flex gap-1">
                 <Link
                   href={`/profiles/${user.id}`}

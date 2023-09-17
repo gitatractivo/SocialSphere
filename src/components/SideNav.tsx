@@ -63,7 +63,7 @@ function SideNav() {
         )}
         {user && (
           <li>
-            <Link href={`/chats`}>
+            <Link href={`/message`}>
               <IconHoverEffect>
                 <span className="flex items-center gap-4">
                   <MdOutlineMailOutline className="h-8 w-8" />

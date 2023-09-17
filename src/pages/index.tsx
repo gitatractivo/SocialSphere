@@ -17,7 +17,7 @@ const Home: NextPage = () => {
 
   return (
     <div className="max-w-[600px]flex  box-border w-full   gap-0 ">
-      <div className="mx-auto box-border max-w-[600px] border-x border-gray-700  sm:mx-0 ">
+      <div className="mx-auto box-border min-h-screen max-w-[600px] border-x border-gray-700 sm:mx-0 ">
         <div className="sticky top-0 z-10  backdrop-blur-2xl transition-colors duration-200 dark:backdrop-blur-xl dark:backdrop-brightness-90  ">
           <header className="  h-[50px]    pt-2 ">
             <h1 className=" mb-2 px-4 text-lg font-bold text-black transition-colors duration-0 dark:text-white">
@@ -31,7 +31,7 @@ const Home: NextPage = () => {
                   return (
                     <button
                       key={tab}
-                      className={`flex-grow p-2 dark:hover:bg-gray-900 hover:bg-gray-200 focus-visible:bg-gray-200 ${
+                      className={`flex-grow p-2 hover:bg-gray-200 focus-visible:bg-gray-200 dark:hover:bg-gray-900 ${
                         tab === selectedTab
                           ? "border-b-4 border-blue-500 font-bold "
                           : "border-b border-gray-700"
@@ -39,7 +39,6 @@ const Home: NextPage = () => {
                       onClick={() => setSelectedTab(tab)}
                     >
                       {tab}
-                      
                     </button>
                   );
                 })}
