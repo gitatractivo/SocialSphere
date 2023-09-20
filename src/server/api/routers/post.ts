@@ -221,7 +221,6 @@ export const postRouter = createTRPCRouter({
       return { ...post, isLiked: post.likes.length > 0 };
     }),
   getDetails: protectedProcedure.query(() => {
-    console.log("first");
 
     const apiSecret = cloudinary.config().api_secret as string;
     const apiKey = cloudinary.config().api_key as string;

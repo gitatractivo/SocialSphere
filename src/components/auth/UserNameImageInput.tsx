@@ -201,8 +201,10 @@ export default function UserNameImageInput() {
       return;
     }
 
+    console.log(username,)
+
     const resp = await mutateAsync({
-      ...(username === session.data?.user.username ? { username } : {}),
+      ...(username === session.data?.user.username ? {} : { username }),
       userId: session.data?.user.id as string,
       ...(!!attactment && imageCHange ? { image: attactment } : {}),
     });

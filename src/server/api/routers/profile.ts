@@ -161,14 +161,14 @@ export const profileRouter = createTRPCRouter({
   createUsernameOrImage: protectedProcedure
     .input(createUsernameOrImageSchema)
     .mutation(async ({ ctx, input: { image, userId, username } }) => {
-      console.log(userId);
+      console.log("usernamechange api")
+      console.log("incoming Data",userId,image,username);
       const user = await ctx.prisma.user.findFirst({
         where: {
           id: userId,
         },
       });
-      const userALl = await ctx.prisma.user.findMany({});
-      console.log(user, userALl);
+      console.log("user",user)
       if (!user) {
         throw new trpc.TRPCError({
           code: "CONFLICT",
