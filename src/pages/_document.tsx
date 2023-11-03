@@ -5,7 +5,7 @@ export default function Document() {
   return (
     <Html>
       <Head>
-        <title>SocialSphere</title>
+        {/* <title>SocialSphere</title> */}
         <meta
           name="description"
           content="This is a basic social media application with chat functionality"

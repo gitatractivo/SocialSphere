@@ -45,14 +45,15 @@ export const postRouter = createTRPCRouter({
     .query(
       async ({ input: { limit = 10, onlyFollowing = false, cursor }, ctx }) => {
         const currentUserId = ctx.session?.user.id;
+        console.log(currentUserId)
 
         return await getInfinitePosts({
           limit,
           ctx,
           cursor,
           whereClause:
-            currentUserId == null || !onlyFollowing
-              ? undefined
+            currentUserId === undefined || !onlyFollowing
+              ? {}
               : {
                   user: {
                     followers: {
@@ -254,19 +255,20 @@ async function getInfinitePosts({
 }) {
   const currentUserId = ctx.session?.user.id;
 
-  if(!currentUserId){
-    throw new trpc.TRPCError({
-      code: "CONFLICT",
-      message: "Error",
-    });
-  }
+  // if(!currentUserId){
+  //   throw new trpc.TRPCError({
+  //     code: "CONFLICT",
+  //     message: "Error",
+  //   });
+  // }
+  
 
   const data = await ctx.prisma.post.findMany({
     take: limit + 1,
     cursor: cursor ? { createdAt_id: cursor } : undefined,
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     where: whereClause,
-    select: selectObject(currentUserId),
+    select: selectObject(currentUserId??""),
   });
   let nextCursor: typeof cursor | undefined;
   if (data.length > limit) {

@@ -83,6 +83,9 @@ const Input: React.FC<InputProps> = ({
             focus:ring-2 
             focus:ring-inset
             focus:ring-sky-600
+            hover:ring-2 
+            hover:ring-inset
+            hover:ring-sky-600
             dark:bg-gray-200 
             sm:leading-6`,
             errors[id] && "focus:ring-rose-500",
