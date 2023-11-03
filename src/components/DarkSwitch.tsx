@@ -11,7 +11,9 @@ import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { Button } from "./Button";
 
-// export let isDark = true;
+
+// eslint-disable-next-line prefer-const
+export let isDark = true;
 
 
 const DarkSwitch = ({ small = false }: { small?: boolean }) => {
