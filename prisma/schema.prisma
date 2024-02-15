@@ -4,7 +4,6 @@
 generator client {
     provider = "prisma-client-js"
 }
-
 datasource db {
     provider = "postgresql"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
@@ -14,18 +13,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -33,14 +20,15 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    ui                String?
 
     @@unique([provider, providerAccountId])
 }
@@ -54,14 +42,117 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String         @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?        @unique
+    username      String?        @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
     posts         Post[]
+    likes         Like[]
+    password      String?
+    followers     User[]         @relation(name: "Followers")
+    following     User[]         @relation(name: "Followers")
+    chats         UsersOnChats[]
+    messages      Message[]
+}
+
+model Post {
+    id          String    @id @default(cuid())
+    createdAt   DateTime  @default(now())
+    content     String?
+    userId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    likes       Like[]
+    commentToId String?
+    commentTO   Post?     @relation(name: "comments", fields: [commentToId], references: [id], onDelete: Cascade)
+    comments    Post[]    @relation(name: "comments")
+    repostToId  String?
+    repostTo    Post?     @relation(name: "repost", fields: [repostToId], references: [id])
+    reposts     Post[]    @relation(name: "repost")
+    files       File[]
+    Message     Message[]
+
+    @@unique([createdAt, id])
+}
+
+model File {
+    id        String   @id @default(cuid())
+    type      String
+    url       String
+    name      String
+    extension String
+    mime      String
+    size      Int
+    height    Int?
+    width     Int?
+    createdAt DateTime @default(now())
+    postId    String
+    post      Post     @relation(fields: [postId], references: [id])
+}
+
+model MessageFile {
+    id        String   @id @default(cuid())
+    type      String
+    url       String
+    name      String
+    extension String
+    mime      String
+    size      Int
+    height    Int?
+    width     Int?
+    createdAt DateTime @default(now())
+
+    Message   Message @relation(fields: [messageId], references: [id])
+    messageId String
+}
+
+model Like {
+    userId String
+    postId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    @@id([userId, postId])
+}
+
+model Chat {
+    id        String         @id @default(cuid())
+    messages  Message[]
+    users     UsersOnChats[]
+    createdAt DateTime       @default(now())
+    updatedAt DateTime       @updatedAt
+}
+
+model UsersOnChats {
+    id      String @id @default(cuid())
+    userId  String
+    chatId  String
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    chat    Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    hasSeen Int    @default(0)
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    @@unique([createdAt, id])
+
+}
+
+model Message {
+    id     String @id @default(cuid())
+    chatId String
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    files     MessageFile[]
+    createdAt DateTime      @default(now())
+    post      Post?         @relation(fields: [postId], references: [id])
+    postId    String?
+    text      String
+
+    @@unique([createdAt, id])
 }
 
 model VerificationToken {
